@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Panel | Deals99</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+      .admin-list-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 18px;
+      }
+      .admin-list-table th, .admin-list-table td {
+        border: 1px solid #eee;
+        padding: 8px 10px;
+        text-align: left;
+        font-size: 1em;
+      }
+      .admin-list-table th {
+        background: #f6f8fa;
+        color: #1d3557;
+      }
+      .admin-list-table img {
+        width: 40px; height: 40px; object-fit: cover; border-radius: 6px;
+      }
+      .admin-action-btn {
+        background: #457b9d;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 3px 10px;
+        margin-right: 6px;
+        cursor: pointer;
+      }
+      .admin-action-btn.remove { background: #e63946; }
+      .admin-action-btn.edit { background: #ffb703; color: #222; }
+      .admin-action-btn:disabled { background: #ccc; color: #888; cursor: not-allowed; }
+      .admin-section-box { margin-bottom: 32px; }
+      .admin-section-box h3 { margin-bottom: 10px; }
+      .admin-panel input, .admin-panel select, .admin-panel textarea { margin-bottom: 7px; width: 100%; padding: 6px; }
+      .admin-panel img { max-width: 80px; display: block; margin: 10px 0; }
+      .admin-panel button { margin-bottom: 7px; }
+      .admin-panel label { font-weight: 500; }
+      .admin-panel { margin-bottom: 18px; }
+    </style>
+</head>
+<body>
+    <!-- Admin Login -->
+    <div id="adminAuthContainer" class="auth-container" style="max-width:350px;margin:60px auto;">
+        <h2>Admin Login</h2>
+        <div id="adminLoginError" class="auth-error"></div>
+        <input type="email" id="adminLoginEmail" placeholder="Admin Email" autocomplete="email" required />
+        <input type="password" id="adminLoginPassword" placeholder="Password" autocomplete="current-password" required />
+        <button id="adminLoginBtn">Login</button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanelSection" style="display:none;">
+        <section class="admin-panel-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h2 class="section-title">Admin Panel</h2>
+                <button onclick="localStorage.removeItem('isAdminLoggedIn');location.reload();" style="background:#e74c3c;color:#fff;padding:7px 18px;border-radius:5px;border:none;cursor:pointer;">Logout</button>
+            </div>
+            <div class="admin-sections-flex" style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start;">
+
+                <!-- New Arrivals Section -->
+                <div class="admin-section-box" style="flex:1 1 420px; min-width:340px; max-width:480px;">
+                    <h3>New Arrivals (Drafts)</h3>
+                    <div class="admin-panel">
+                        <input type="text" id="arrivalProductName" placeholder="Product Name" />
+                        <input type="number" id="arrivalProductMRP" placeholder="MRP" min="1" />
+                        <input type="number" id="arrivalProductPrice" placeholder="Discounted Price" min="1" />
+                        <input type="number" id="arrivalProductStock" placeholder="Pieces Available" min="0" />
+                        <input type="number" id="arrivalProductMinQty" placeholder="Min Order Quantity" min="1" />
+                        <select id="arrivalProductCategory">
+                            <option value="">Select Category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Keychains">Keychains</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Gifts">Gifts</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <select id="arrivalProductSubcategory">
+                          <option value="">Select Subcategory (optional)</option>
+                        </select>
+                        <textarea id="arrivalProductDesc" placeholder="Product Description"></textarea>
+                        <input type="file" id="arrivalProductImgFile" accept="image/*" multiple />
+                        <div id="arrivalImgPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"></div>
+                        <button id="adminAddProductBtn" style="background:#457b9d;color:#fff;">Add to Drafts</button>
+                    </div>
+                    <input type="text" id="adminSearch" placeholder="Search products..." style="margin-bottom:10px;width:100%;padding:6px;" />
+                    <div id="adminArrivals" style="overflow-x:auto;"></div>
+                </div>
+
+                <!-- Live Products Section -->
+                <div class="admin-section-box" style="flex:1 1 420px; min-width:340px; max-width:480px;">
+                    <h3>Live Products</h3>
+                    <div class="admin-panel">
+                        <input type="text" id="liveProductName" placeholder="Product Name" />
+                        <input type="number" id="liveProductMRP" placeholder="MRP" min="1" />
+                        <input type="number" id="liveProductPrice" placeholder="Discounted Price" min="1" />
+                        <input type="number" id="liveProductStock" placeholder="Pieces Available" min="0" />
+                        <input type="number" id="liveProductMinQty" placeholder="Min Order Quantity" min="1" />
+                        <select id="liveProductCategory">
+                            <option value="">Select Category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Keychains">Keychains</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Gifts">Gifts</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <select id="liveProductSubcategory">
+                          <option value="">Select Subcategory (optional)</option>
+                        </select>
+                        <textarea id="liveProductDesc" placeholder="Product Description"></textarea>
+                        <input type="file" id="liveProductImgFile" accept="image/*" multiple />
+                        <div id="liveImgPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"></div>
+                        <button id="liveAddProductBtn" style="background:#27ae60;color:#fff;">Add Product Live</button>
+                    </div>
+                    <input type="text" id="liveSearch" placeholder="Search live products..." style="margin-bottom:10px;width:100%;padding:6px;" />
+                    <div id="adminLiveProducts" style="overflow-x:auto;"></div>
+                </div>
+
+                <!-- Today ₹99 Deals Section -->
+                <div class="admin-section-box" style="flex:1 1 420px; min-width:340px; max-width:480px;">
+                    <h3>Today ₹99 Deals</h3>
+                    <div class="admin-panel">
+                        <input type="text" id="today99ProductName" placeholder="Product Name" />
+                        <input type="number" id="today99ProductMRP" placeholder="MRP" min="1" />
+                        <input type="number" id="today99ProductDiscounted" placeholder="Discounted Price" min="1" />
+                        <input type="number" id="today99ProductStock" placeholder="Pieces Available" min="0" />
+                        <input type="number" id="today99ProductMinQty" placeholder="Min Order Quantity" min="1" />
+                        <input type="datetime-local" id="today99OfferValidTill" />
+                        <select id="today99ProductCategory">
+                            <option value="">Select Category</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Keychains">Keychains</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Gifts">Gifts</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <select id="today99ProductSubcategory">
+                          <option value="">Select Subcategory (optional)</option>
+                        </select>
+                        <textarea id="today99ProductDesc" placeholder="Product Description"></textarea>
+                        <input type="file" id="today99ProductImgFile" accept="image/*" multiple />
+                        <div id="today99ImgPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"></div>
+                        <button id="addToday99ProductBtn" style="background:#ff3e6c;color:#fff;">Add to Today ₹99 Deals</button>
+                    </div>
+
+                    <!-- Improved: Select existing products to add to Today99 -->
+                    <div style="margin:18px 0;">
+                      <label for="today99ProductSearch" style="font-weight:500;">Select Existing Products to List Under Today ₹99 Deals:</label>
+                      <input type="text" id="today99ProductSearch" placeholder="Search products..." style="margin-bottom:7px;width:100%;padding:6px;" />
+                      <div id="today99ProductSelectList" style="max-height:180px;overflow:auto;border:1px solid #eee;padding:7px 0 7px 7px;border-radius:5px;background:#fafbfc;"></div>
+                      <button id="addSelectedToToday99" style="background:#ff3e6c;color:#fff;margin-top:7px;">Add Selected to Today ₹99 Deals</button>
+                    </div>
+
+                    <div id="adminToday99Deals" style="overflow-x:auto;"></div>
+                </div>
+
+                <!-- Combo Offers Section -->
+                <div class="admin-section-box" style="flex:1 1 420px; min-width:340px; max-width:480px;">
+                    <h3>Combo Offers (Best Price)</h3>
+                    <div class="admin-panel">
+                        <input type="text" id="comboTitle" placeholder="Combo Title (e.g. Rakhi Combo)" />
+                        <input type="number" id="comboPrice" placeholder="Combo Price" min="1" />
+                        <label for="comboProductSearch" style="font-weight:500;">Search &amp; Choose Products:</label>
+                        <input type="text" id="comboProductSearch" placeholder="Type to filter products..." style="margin-bottom:7px;" />
+                        <div id="comboProductsList" style="max-height:180px;overflow:auto;border:1px solid #eee;padding:7px 0 7px 7px;border-radius:5px;background:#fafbfc;margin-bottom:7px;"></div>
+                        <button id="addComboBtn" style="background:#f77f00;color:#fff;">Add Combo Offer</button>
+                    </div>
+                    <div id="adminComboOffers"></div>
+                </div>
+
+                <!-- Special Offers Section -->
+                <div class="admin-section-box" style="flex:1 1 420px; min-width:340px; max-width:480px;">
+                    <h3>Special Offers</h3>
+                    <div class="admin-panel">
+                        <input type="text" id="specialOfferTitle" placeholder="Offer Title (e.g. Monsoon Offer)" />
+                        <input type="text" id="specialOfferDesc" placeholder="Short Description" />
+                        <input type="datetime-local" id="specialOfferValidTill" />
+                        <label for="specialOfferProductSearch" style="font-weight:500;">Search &amp; Choose Products:</label>
+                        <input type="text" id="specialOfferProductSearch" placeholder="Type to filter products..." style="margin-bottom:7px;" />
+                        <div id="specialOfferProductsList" style="max-height:180px;overflow:auto;border:1px solid #eee;padding:7px 0 7px 7px;border-radius:5px;background:#fafbfc;margin-bottom:7px;"></div>
+                        <button id="addSpecialOfferBtn" style="background:#ffb703;color:#222;">Add Special Offer</button>
+                    </div>
+                    <div id="adminSpecialOffers"></div>
+                </div>
+            </div>
+            <!-- Order Management section -->
+            <div style="margin-top:40px;">
+                <h3>Order Management</h3>
+                <div style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                    <input type="text" id="orderSearch" placeholder="Search by name, email, status, phone..." style="flex:2 1 200px;padding:6px;margin-bottom:10px;">
+                    <select id="orderStatusFilter" style="flex:1 1 120px;padding:6px;margin-bottom:10px;">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <select id="orderSort" style="flex:1 1 120px;padding:6px;margin-bottom:10px;">
+                        <option value="date_desc">Newest First</option>
+                        <option value="date_asc">Oldest First</option>
+                        <option value="total_desc">Total High-Low</option>
+                        <option value="total_asc">Total Low-High</option>
+                    </select>
+                    <button id="exportOrdersBtn" style="background:#457b9d;color:#fff;border:none;border-radius:4px;padding:7px 18px;cursor:pointer;">Export CSV</button>
+                    <button id="clearOrdersBtn" style="background:#e63946;color:#fff;border:none;border-radius:4px;padding:7px 18px;cursor:pointer;">Clear All</button>
+                </div>
+                <div id="adminOrders" style="overflow-x:auto;"></div>
+            </div>
+        </section>
+    </div>
+    <script>
+        // --- Admin Auth ---
+        const ADMIN_EMAIL = "admin@deals99.in";
+        const ADMIN_PASSWORD = "Admin@123";
+        if (localStorage.getItem("isAdminLoggedIn") === "true") {
+            document.getElementById("adminAuthContainer").style.display = "none";
+            document.getElementById("adminPanelSection").style.display = "block";
+        }
+        document.getElementById("adminLoginBtn").onclick = function() {
+            const email = document.getElementById("adminLoginEmail").value.trim();
+            const password = document.getElementById("adminLoginPassword").value;
+            const errorDiv = document.getElementById("adminLoginError");
+            errorDiv.textContent = "";
+            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                localStorage.setItem("isAdminLoggedIn", "true");
+                document.getElementById("adminAuthContainer").style.display = "none";
+                document.getElementById("adminPanelSection").style.display = "block";
+                location.reload();
+            } else {
+                errorDiv.textContent = "Invalid admin credentials.";
+            }
+        };
+
+        // --- Utility: Get/set from localStorage ---
+        function getLS(key) {
+            return JSON.parse(localStorage.getItem(key)) || [];
+        }
+        function setLS(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        // --- Category and Subcategory Definitions (match home page) ---
+        const CATEGORY_DEFS = [
+            {
+                name: "Fashion",
+                icon: "fa-tshirt",
+                desc: "Clothing, Accessories",
+                subcategories: [
+                    "Men's T-Shirts", "Women's Dresses", "Kids Wear", "Accessories", "Ethnic Wear", "Footwear", "Bags & Wallets", "All"
+                ]
+            },
+            {
+                name: "Electronics",
+                icon: "fa-laptop",
+                desc: "Mobiles, Gadgets",
+                subcategories: [
+                    "Mobiles", "Laptops", "Earphones", "Smart Watches", "Tablets", "Power Banks", "Speakers", "All"
+                ]
+            },
+            {
+                name: "Keychains",
+                icon: "fa-key",
+                desc: "Customized, Cool",
+                subcategories: [
+                    "Superhero Keychains", "Name Keychains", "Photo Keychains", "Metal Keychains", "Wooden Keychains", "Cartoon Keychains", "All"
+                ]
+            },
+            {
+                name: "Gifts",
+                icon: "fa-gift",
+                desc: "Surprise Gifts",
+                subcategories: [
+                    "Birthday Gifts", "Anniversary Gifts", "Personalized Gifts", "Gift Hampers", "Greeting Cards", "Flowers", "All"
+                ]
+            },
+            {
+                name: "Other",
+                icon: "fa-star",
+                desc: "More Deals",
+                subcategories: [
+                    "Home Decor", "Stationery", "Toys", "Kitchenware", "Fitness", "Other", "All"
+                ]
+            }
+        ];
+
+        // --- Populate category and subcategory selects dynamically ---
+        function populateCategorySelect(selectId, subcatId) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="">Select Category</option>`;
+            CATEGORY_DEFS.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat.name;
+                opt.textContent = cat.name;
+                select.appendChild(opt);
+            });
+            select.onchange = function () {
+                populateSubcategorySelect(selectId, subcatId);
+            };
+        }
+        function populateSubcategorySelect(catSelectId, subcatId) {
+            const cat = document.getElementById(catSelectId).value;
+            const subcatSelect = document.getElementById(subcatId);
+            subcatSelect.innerHTML = `<option value="">Select Subcategory (optional)</option>`;
+            const found = CATEGORY_DEFS.find(c => c.name === cat);
+            if (found) {
+                found.subcategories.forEach(sub => {
+                    const opt = document.createElement("option");
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    subcatSelect.appendChild(opt);
+                });
+            }
+        }
+        // Call for all product forms
+        populateCategorySelect("arrivalProductCategory", "arrivalProductSubcategory");
+        populateCategorySelect("liveProductCategory", "liveProductSubcategory");
+        populateCategorySelect("today99ProductCategory", "today99ProductSubcategory");
+
+        // --- Easy Product Listing: Move from Drafts to Live, Copy to Today99, etc. ---
+        function moveArrivalToLive(idx) {
+            let arrivals = getLS("arrivals");
+            let liveProducts = getLS("liveProducts");
+            const prod = arrivals[idx];
+            if (!prod) return;
+            liveProducts.push(prod);
+            setLS("liveProducts", liveProducts);
+            arrivals.splice(idx, 1);
+            setLS("arrivals", arrivals);
+            renderAdminArrivals();
+            renderAdminLiveProducts();
+            alert("✅ Product moved to Live!");
+        }
+        function copyLiveToToday99(idx) {
+            let liveProducts = getLS("liveProducts");
+            let today99 = getLS("today99deals");
+            const prod = liveProducts[idx];
+            if (!prod) return;
+            today99.push({
+                ...prod,
+                discounted: 99,
+                validTill: "",
+                createdAt: new Date().toISOString()
+            });
+            setLS("today99deals", today99);
+            renderAdminToday99Deals();
+            alert("✅ Product copied to Today ₹99 Deals!");
+        }
+
+        // --- Render All Products (for product.html) ---
+        function renderAllProductsTable(containerId, filter = "") {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            let all = [
+                ...getLS("liveProducts").map(p => ({ ...p, _source: "Live" })),
+                ...getLS("arrivals").map(p => ({ ...p, _source: "Draft" })),
+                ...getLS("today99deals").map(p => ({ ...p, _source: "Today99" }))
+            ];
+            // Remove duplicates by name
+            const seen = new Set();
+            all = all.filter(p => {
+                if (seen.has(p.name)) return false;
+                seen.add(p.name);
+                return true;
+            });
+            if (filter) {
+                all = all.filter(p =>
+                    p.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    (p.category && p.category.toLowerCase().includes(filter.toLowerCase())) ||
+                    (p.subcategory && p.subcategory.toLowerCase().includes(filter.toLowerCase()))
+                );
+            }
+            if (!all.length) {
+                container.innerHTML = "<p>No products found.</p>";
+                return;
+            }
+            let html = `<table class="admin-list-table"><thead>
+                <tr>
+                    <th>Image</th><th>Name</th><th>MRP</th><th>Price</th><th>Stock</th><th>Min Qty</th><th>Category</th><th>Subcategory</th><th>Source</th><th>Description</th>
+                </tr></thead><tbody>`;
+            all.forEach(item => {
+                html += `<tr>
+                    <td>${Array.isArray(item.img) ? item.img.map(src => `<img src="${src}" style="width:28px;height:28px;border-radius:4px;margin-right:2px;">`).join("") : `<img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" style="width:28px;height:28px;border-radius:4px;">`}</td>
+                    <td>${item.name}</td>
+                    <td>₹${item.mrp || item.discounted || ""}</td>
+                    <td>₹${item.price || item.discounted || ""}</td>
+                    <td>${item.stock ?? 0}</td>
+                    <td>${item.minQty ?? 1}</td>
+                    <td>${item.category || ""}</td>
+                    <td>${item.subcategory || ""}</td>
+                    <td>${item._source || ""}</td>
+                    <td>${item.desc || ""}</td>
+                </tr>`;
+            });
+            html += "</tbody></table>";
+            container.innerHTML = html;
+        }
+
+        // --- Add "Move to Live" and "Copy to Today99" buttons in Arrivals and Live tables ---
+    // Patch renderAdminArrivals
+    const origRenderAdminArrivals = renderAdminArrivals;
+    renderAdminArrivals = function (filter = "") {
+        origRenderAdminArrivals(filter);
+        const adminArrivals = document.getElementById("adminArrivals");
+        if (!adminArrivals) return;
+        adminArrivals.querySelectorAll("tr").forEach((row, idx) => {
+            if (idx === 0) return; // skip header
+            let btn = document.createElement("button");
+            btn.className = "admin-action-btn";
+            btn.style.background = "#27ae60";
+            btn.textContent = "Move to Live";
+            btn.onclick = function () { moveArrivalToLive(idx - 1); };
+            row.lastElementChild.appendChild(btn);
+        });
+    };
+    // Patch renderAdminLiveProducts
+    const origRenderAdminLiveProducts = renderAdminLiveProducts;
+    renderAdminLiveProducts = function (filter = "") {
+        origRenderAdminLiveProducts(filter);
+        const adminLive = document.getElementById("adminLiveProducts");
+        if (!adminLive) return;
+        adminLive.querySelectorAll("tr").forEach((row, idx) => {
+            if (idx === 0) return;
+            let btn = document.createElement("button");
+            btn.className = "admin-action-btn";
+            btn.style.background = "#ff3e6c";
+            btn.textContent = "Copy to Today99";
+            btn.onclick = function () { copyLiveToToday99(idx - 1); };
+            row.lastElementChild.appendChild(btn);
+        });
+    };
+
+    // --- Add "All Products" Section ---
+    const allProductsSection = document.createElement("div");
+    allProductsSection.className = "admin-section-box";
+    allProductsSection.style = "flex:1 1 900px; min-width:340px; max-width:1000px;";
+    allProductsSection.innerHTML = `
+        <h3>All Products (Live, Drafts, Today99)</h3>
+        <input type="text" id="allProductsSearch" placeholder="Search all products..." style="margin-bottom:10px;width:100%;padding:6px;" />
+        <div id="adminAllProducts" style="overflow-x:auto;"></div>
+    `;
+    document.querySelector(".admin-sections-flex").appendChild(allProductsSection);
+
+    document.getElementById("allProductsSearch").addEventListener("input", function () {
+        renderAllProductsTable("adminAllProducts", this.value);
+    });
+    renderAllProductsTable("adminAllProducts");
+
+    // --- Add Home Page Sections for Admin Preview ---
+    function renderAdminHomeSections() {
+        const previewDiv = document.createElement("div");
+        previewDiv.className = "admin-section-box";
+        previewDiv.style = "flex:1 1 900px; min-width:340px; max-width:1000px;";
+        previewDiv.innerHTML = `
+            <h3>Home Page Sections Preview</h3>
+            <div id="adminHomeSections"></div>
+        `;
+        document.querySelector(".admin-sections-flex").appendChild(previewDiv);
+        const container = document.getElementById("adminHomeSections");
+        CATEGORY_DEFS.forEach(cat => {
+            const products = getLS("liveProducts").filter(p => p.category === cat.name);
+            container.innerHTML += `
+                <div style="margin-bottom:24px;">
+                    <h4><i class="fas ${cat.icon}" style="color:#ff3e6c;margin-right:7px;"></i>${cat.name}</h4>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                        ${products.length ? products.map(p => `
+                            <div style="background:#f8f8f8;border-radius:8px;padding:10px 14px;min-width:160px;">
+                                <img src="${Array.isArray(p.img) ? p.img[0] : (p.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" style="width:60px;height:60px;border-radius:6px;object-fit:cover;">
+                                <div style="font-weight:500;margin:6px 0 2px 0;">${p.name}</div>
+                                <div style="color:#888;font-size:0.97em;">₹${p.price}</div>
+                                <div style="color:#888;font-size:0.93em;">${p.subcategory || ""}</div>
+                            </div>
+                        `).join("") : `<span style="color:#aaa;">No products in this category.</span>`}
+                    </div>
+                </div>
+            `;
+        });
+    }
+    renderAdminHomeSections();
+
+    // --- Add Subcategory Preview Section ---
+    function renderAdminSubcategorySections() {
+        const previewDiv = document.createElement("div");
+        previewDiv.className = "admin-section-box";
+        previewDiv.style = "flex:1 1 900px; min-width:340px; max-width:1000px;";
+        previewDiv.innerHTML = `
+            <h3>Subcategory Preview</h3>
+            <div id="adminSubcatSections"></div>
+        `;
+        document.querySelector(".admin-sections-flex").appendChild(previewDiv);
+        const container = document.getElementById("adminSubcatSections");
+        CATEGORY_DEFS.forEach(cat => {
+            cat.subcategories.forEach(subcat => {
+                if (subcat === "All") return;
+                const products = getLS("liveProducts").filter(p => p.category === cat.name && p.subcategory === subcat);
+                if (products.length) {
+                    container.innerHTML += `
+                        <div style="margin-bottom:18px;">
+                            <h5 style="color:#1d3557;">${cat.name} / ${subcat}</h5>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                ${products.map(p => `
+                                    <div style="background:#f8f8f8;border-radius:8px;padding:8px 12px;min-width:120px;">
+                                        <img src="${Array.isArray(p.img) ? p.img[0] : (p.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">
+                                        <div style="font-weight:500;margin:4px 0 2px 0;">${p.name}</div>
+                                        <div style="color:#888;font-size:0.95em;">₹${p.price}</div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+    }
+    renderAdminSubcategorySections();
+
+    // --- Expose renderAllProductsTable for product.html ---
+    window.renderAllProductsTable = renderAllProductsTable;
+
+        // --- Image Upload and Preview for all sections ---
+        function setupImagePreview(inputId, previewId, dataVarName) {
+          let uploadedImageData = "";
+          document.getElementById(inputId).addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              uploadedImageData = evt.target.result;
+              document.getElementById(previewId).src = uploadedImageData;
+              window[dataVarName] = uploadedImageData;
+            };
+            reader.readAsDataURL(file);
+          });
+          window[dataVarName] = "";
+        }
+        setupImagePreview("arrivalProductImgFile", "arrivalImgPreview", "arrivalUploadedImageData");
+        setupImagePreview("liveProductImgFile", "liveImgPreview", "liveUploadedImageData");
+        setupImagePreview("today99ProductImgFile", "today99ImgPreview", "today99UploadedImageData");
+
+        // --- Multi-image upload preview utility ---
+    function setupMultiImagePreview(inputId, previewId, dataVarName) {
+        window[dataVarName] = [];
+        document.getElementById(inputId).addEventListener("change", function(e) {
+            const files = Array.from(e.target.files);
+            window[dataVarName] = [];
+            const previewDiv = document.getElementById(previewId);
+            previewDiv.innerHTML = "";
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    window[dataVarName].push(evt.target.result);
+                    const img = document.createElement("img");
+                    img.src = evt.target.result;
+                    img.style.maxWidth = "60px";
+                    img.style.maxHeight = "60px";
+                    img.style.borderRadius = "6px";
+                    img.style.marginRight = "4px";
+                    previewDiv.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
+    setupMultiImagePreview("arrivalProductImgFile", "arrivalImgPreview", "arrivalUploadedImages");
+    setupMultiImagePreview("liveProductImgFile", "liveImgPreview", "liveUploadedImages");
+    setupMultiImagePreview("today99ProductImgFile", "today99ImgPreview", "today99UploadedImages");
+
+        // --- Add Product to Drafts (New Arrivals) ---
+        document.getElementById("adminAddProductBtn").addEventListener("click", function() {
+            const name = document.getElementById("arrivalProductName").value.trim();
+            const mrp = document.getElementById("arrivalProductMRP").value;
+            const price = document.getElementById("arrivalProductPrice").value;
+            const stock = document.getElementById("arrivalProductStock").value;
+            const minQty = document.getElementById("arrivalProductMinQty").value || 1;
+            const category = document.getElementById("arrivalProductCategory").value;
+            const subcategory = document.getElementById("arrivalProductSubcategory").value.trim();
+            const desc = document.getElementById("arrivalProductDesc").value.trim();
+            const img = window.arrivalUploadedImages && window.arrivalUploadedImages.length > 0 ? window.arrivalUploadedImages : [];
+            if (!name || !mrp || !price || stock === "" || !category) {
+                alert("Please enter product name, MRP, discounted price, pieces available, and select a category.");
+                return;
+            }
+            let arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+            arrivals.push({ name, mrp, price, stock, minQty, category, subcategory, desc, img, createdAt: new Date().toISOString() });
+            localStorage.setItem("arrivals", JSON.stringify(arrivals));
+            // Reset form
+            document.getElementById("arrivalProductName").value = "";
+            document.getElementById("arrivalProductMRP").value = "";
+            document.getElementById("arrivalProductPrice").value = "";
+            document.getElementById("arrivalProductStock").value = "";
+            document.getElementById("arrivalProductMinQty").value = "";
+            document.getElementById("arrivalProductCategory").value = "";
+            document.getElementById("arrivalProductSubcategory").value = "";
+            document.getElementById("arrivalProductDesc").value = "";
+            document.getElementById("arrivalProductImgFile").value = "";
+            document.getElementById("arrivalImgPreview").src = "https://cdn-icons-png.flaticon.com/512/2905/2905673.png";
+            window.arrivalUploadedImageData = "";
+            renderAdminArrivals(document.getElementById("adminSearch")?.value || "");
+            alert("✅ Product added to drafts!");
+        });
+
+        // --- Render Admin Arrivals (Table) ---
+        function renderAdminArrivals(filter = "") {
+            const adminArrivals = document.getElementById("adminArrivals");
+            if (!adminArrivals) return;
+            let arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+            if (filter) {
+                arrivals = arrivals.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()));
+            }
+            if (arrivals.length === 0) {
+                adminArrivals.innerHTML = "<p>No arrivals found.</p>";
+                return;
+            }
+            let html = `<table class="admin-list-table"><thead>
+                <tr>
+                  <th>Image</th><th>Name</th><th>MRP</th><th>Price</th><th>Stock</th><th>Min Qty</th><th>Category</th><th>Subcategory</th><th>Description</th><th>Actions</th>
+                </tr></thead><tbody>`;
+            arrivals.forEach((item, idx) => {
+                html += `<tr>
+                  <td>${Array.isArray(item.img) ? item.img.map(src => `<img src="${src}" style="width:28px;height:28px;border-radius:4px;margin-right:2px;">`).join("") : `<img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" style="width:28px;height:28px;border-radius:4px;">`}</td>
+                  <td>${item.name}</td>
+                  <td>₹${item.mrp}</td>
+                  <td>₹${item.price}</td>
+                  <td>${item.stock ?? 0}</td>
+                  <td>${item.minQty ?? 1}</td>
+                  <td>${item.category || ""}</td>
+                  <td>${item.subcategory || ""}</td>
+                  <td>${item.desc || ""}</td>
+                  <td>
+                    <button class="admin-action-btn edit" data-idx="${idx}">Edit</button>
+                    <button class="admin-action-btn remove" data-idx="${idx}">Remove</button>
+                  </td>
+                </tr>`;
+            });
+            html += "</tbody></table>";
+            adminArrivals.innerHTML = html;
+            // Remove
+            adminArrivals.querySelectorAll(".admin-action-btn.remove").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    let arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+                    arrivals.splice(Number(this.dataset.idx), 1);
+                    localStorage.setItem("arrivals", JSON.stringify(arrivals));
+                    renderAdminArrivals(document.getElementById("adminSearch")?.value || "");
+                });
+            });
+            // Edit
+            adminArrivals.querySelectorAll(".admin-action-btn.edit").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    let arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+                    const idx = Number(this.dataset.idx);
+                    const item = arrivals[idx];
+                    const newName = prompt("Edit product name:", item.name);
+                    if (newName === null) return;
+                    const newPrice = prompt("Edit product price:", item.price);
+                    if (newPrice === null) return;
+                    const newStock = prompt("Edit pieces available:", item.stock ?? 0);
+                    if (newStock === null) return;
+                    const newMinQty = prompt("Edit minimum order quantity:", item.minQty ?? 1);
+                    if (newMinQty === null) return;
+                    const newCategory = prompt("Edit category:", item.category || "");
+                    if (newCategory === null) return;
+                    const newSubcategory = prompt("Edit subcategory:", item.subcategory || "");
+                    if (newSubcategory === null) return;
+                    const newDesc = prompt("Edit description:", item.desc || "");
+                    if (newDesc === null) return;
+                    if (!newName.trim() || isNaN(Number(newPrice)) || Number(newPrice) <= 0 || isNaN(Number(newStock)) || Number(newStock) < 0 || isNaN(Number(newMinQty)) || Number(newMinQty) < 1) {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    arrivals[idx] = { ...item, name: newName.trim(), price: Number(newPrice), stock: Number(newStock), minQty: Number(newMinQty), category: newCategory, subcategory: newSubcategory, desc: newDesc };
+                    localStorage.setItem("arrivals", JSON.stringify(arrivals));
+                    renderAdminArrivals(document.getElementById("adminSearch")?.value || "");
+                    alert("✅ Arrival updated!");
+                });
+            });
+        }
+        renderAdminArrivals();
+
+        // --- Search functionality for arrivals ---
+        document.getElementById("adminSearch").addEventListener("input", function() {
+            renderAdminArrivals(this.value);
+        });
+
+        // --- Live Products Section (Table) ---
+        document.getElementById("liveAddProductBtn").addEventListener("click", function() {
+            const name = document.getElementById("liveProductName").value.trim();
+            const mrp = document.getElementById("liveProductMRP").value;
+            const price = document.getElementById("liveProductPrice").value;
+            const stock = document.getElementById("liveProductStock").value;
+            const minQty = document.getElementById("liveProductMinQty").value || 1;
+            const category = document.getElementById("liveProductCategory").value;
+            const subcategory = document.getElementById("liveProductSubcategory").value.trim();
+            const desc = document.getElementById("liveProductDesc").value.trim();
+            const img = window.liveUploadedImages && window.liveUploadedImages.length > 0 ? window.liveUploadedImages : [];
+            if (!name || !mrp || !price || stock === "" || !category) {
+                alert("Please enter product name, MRP, discounted price, pieces available, and select a category.");
+                return;
+            }
+            let liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+            liveProducts.push({ name, mrp, price, stock, minQty, category, subcategory, desc, img, createdAt: new Date().toISOString() });
+            localStorage.setItem("liveProducts", JSON.stringify(liveProducts));
+            // Reset form
+            document.getElementById("liveProductName").value = "";
+            document.getElementById("liveProductMRP").value = "";
+            document.getElementById("liveProductPrice").value = "";
+            document.getElementById("liveProductStock").value = "";
+            document.getElementById("liveProductMinQty").value = "";
+            document.getElementById("liveProductCategory").value = "";
+            document.getElementById("liveProductSubcategory").value = "";
+            document.getElementById("liveProductDesc").value = "";
+            document.getElementById("liveProductImgFile").value = "";
+            document.getElementById("liveImgPreview").src = "https://cdn-icons-png.flaticon.com/512/2905/2905673.png";
+            window.liveUploadedImageData = "";
+            renderAdminLiveProducts(document.getElementById("liveSearch")?.value || "");
+            alert("✅ Product added live!");
+        });
+
+        function renderAdminLiveProducts(filter = "") {
+            const adminLive = document.getElementById("adminLiveProducts");
+            if (!adminLive) return;
+            let liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+            if (filter) {
+                liveProducts = liveProducts.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()));
+            }
+            if (liveProducts.length === 0) {
+                adminLive.innerHTML = "<p>No live products found.</p>";
+                return;
+            }
+            let html = `<table class="admin-list-table"><thead>
+                <tr>
+                  <th>Image</th><th>Name</th><th>MRP</th><th>Price</th><th>Stock</th><th>Min Qty</th><th>Category</th><th>Subcategory</th><th>Description</th><th>Actions</th>
+                </tr></thead><tbody>`;
+            liveProducts.forEach((item, idx) => {
+                html += `<tr>
+                  <td>${Array.isArray(item.img) ? item.img.map(src => `<img src="${src}" style="width:28px;height:28px;border-radius:4px;margin-right:2px;">`).join("") : `<img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" style="width:28px;height:28px;border-radius:4px;">`}</td>
+                  <td>${item.name}</td>
+                  <td>₹${item.mrp}</td>
+                  <td>₹${item.price}</td>
+                  <td>${item.stock ?? 0}</td>
+                  <td>${item.minQty ?? 1}</td>
+                  <td>${item.category || ""}</td>
+                  <td>${item.subcategory || ""}</td>
+                  <td>${item.desc || ""}</td>
+                  <td>
+                    <button class="admin-action-btn edit" data-idx="${idx}">Edit</button>
+                    <button class="admin-action-btn remove" data-idx="${idx}">Remove</button>
+                  </td>
+                </tr>`;
+            });
+            html += "</tbody></table>";
+            adminLive.innerHTML = html;
+            // Remove
+            adminLive.querySelectorAll(".admin-action-btn.remove").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    let liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+                    liveProducts.splice(Number(this.dataset.idx), 1);
+                    localStorage.setItem("liveProducts", JSON.stringify(liveProducts));
+                    renderAdminLiveProducts(document.getElementById("liveSearch")?.value || "");
+                });
+            });
+            // Edit
+            adminLive.querySelectorAll(".admin-action-btn.edit").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    let liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+                    const idx = Number(this.dataset.idx);
+                    const item = liveProducts[idx];
+                    const newName = prompt("Edit product name:", item.name);
+                    if (newName === null) return;
+                    const newPrice = prompt("Edit product price:", item.price);
+                    if (newPrice === null) return;
+                    const newStock = prompt("Edit pieces available:", item.stock ?? 0);
+                    if (newStock === null) return;
+                    const newMinQty = prompt("Edit minimum order quantity:", item.minQty ?? 1);
+                    if (newMinQty === null) return;
+                    const newCategory = prompt("Edit category:", item.category || "");
+                    if (newCategory === null) return;
+                    const newSubcategory = prompt("Edit subcategory:", item.subcategory || "");
+                    if (newSubcategory === null) return;
+                    const newDesc = prompt("Edit description:", item.desc || "");
+                    if (newDesc === null) return;
+                    if (!newName.trim() || isNaN(Number(newPrice)) || Number(newPrice) <= 0 || isNaN(Number(newStock)) || Number(newStock) < 0 || isNaN(Number(newMinQty)) || Number(newMinQty) < 1) {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    liveProducts[idx] = { ...item, name: newName.trim(), price: Number(newPrice), stock: Number(newStock), minQty: Number(newMinQty), category: newCategory, subcategory: newSubcategory, desc: newDesc };
+                    localStorage.setItem("liveProducts", JSON.stringify(liveProducts));
+                    renderAdminLiveProducts(document.getElementById("liveSearch")?.value || "");
+                    alert("✅ Live product updated!");
+                });
+            });
+        }
+        renderAdminLiveProducts();
+
+        document.getElementById("liveSearch").addEventListener("input", function() {
+            renderAdminLiveProducts(this.value);
+        });
+
+        // --- Today99 Deals Section (Table) ---
+        function renderAdminToday99Deals(filter = "") {
+            const adminToday99 = document.getElementById("adminToday99Deals");
+            if (!adminToday99) return;
+            let deals = JSON.parse(localStorage.getItem("today99deals")) || [];
+            if (filter) {
+                deals = deals.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()));
+            }
+            if (deals.length === 0) {
+                adminToday99.innerHTML = "<p>No Today ₹99 deals found.</p>";
+                return;
+            }
+            let html = `<table class="admin-list-table"><thead>
+            <tr>
+              <th>Image</th><th>Name</th><th>MRP</th><th>Deal Price</th><th>Stock</th><th>Min Qty</th><th>Valid Till</th><th>Category</th><th>Subcategory</th><th>Description</th><th>Actions</th>
+            </tr></thead><tbody>`;
+            deals.forEach((item, idx) => {
+                const validDate = item.validTill ? new Date(item.validTill).toLocaleString() : "N/A";
+                html += `<tr>
+                  <td>${Array.isArray(item.img) ? item.img.map(src => `<img src="${src}" style="width:28px;height:28px;border-radius:4px;margin-right:2px;">`).join("") : `<img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" style="width:28px;height:28px;border-radius:4px;">`}</td>
+                  <td>${item.name}</td>
+                  <td>₹${item.mrp}</td>
+                  <td>₹${item.discounted}</td>
+                  <td>${item.stock ?? 0}</td>
+                  <td>${item.minQty ?? 1}</td>
+                  <td>${validDate}</td>
+                  <td>${item.category || ""}</td>
+                  <td>${item.subcategory || ""}</td>
+                  <td>${item.desc || ""}</td>
+                  <td>
+                    <button class="admin-action-btn edit" data-idx="${idx}">Edit</button>
+                    <button class="admin-action-btn remove" data-idx="${idx}">Remove</button>
+                  </td>
+                </tr>`;
+            });
+            html += "</tbody></table>";
+            adminToday99.innerHTML = html;
+            // Remove
+            adminToday99.querySelectorAll(".admin-action-btn.remove").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    let deals = JSON.parse(localStorage.getItem("today99deals")) || [];
+                    deals.splice(Number(this.dataset.idx), 1);
+                    localStorage.setItem("today99deals", JSON.stringify(deals));
+                    renderAdminToday99Deals(document.getElementById("today99ProductSearch")?.value || "");
+                });
+            });
+            // Edit
+            adminToday99.querySelectorAll(".admin-action-btn.edit").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    let deals = JSON.parse(localStorage.getItem("today99deals")) || [];
+                    const idx = Number(this.dataset.idx);
+                    const item = deals[idx];
+                    const newName = prompt("Edit product name:", item.name);
+                    if (newName === null) return;
+                    const newMRP = prompt("Edit MRP:", item.mrp);
+                    if (newMRP === null) return;
+                    const newDiscounted = prompt("Edit deal price:", item.discounted);
+                    if (newDiscounted === null) return;
+                    const newStock = prompt("Edit pieces available:", item.stock ?? 0);
+                    if (newStock === null) return;
+                    const newMinQty = prompt("Edit minimum order quantity:", item.minQty ?? 1);
+                    if (newMinQty === null) return;
+                    const newValidTill = prompt("Edit valid till (yyyy-mm-ddThh:mm):", item.validTill || "");
+                    if (newValidTill === null) return;
+                    const newCategory = prompt("Edit category:", item.category || "");
+                    if (newCategory === null) return;
+                    const newSubcategory = prompt("Edit subcategory:", item.subcategory || "");
+                    if (newSubcategory === null) return;
+                    const newDesc = prompt("Edit description:", item.desc || "");
+                    if (newDesc === null) return;
+                    if (!newName.trim() || isNaN(Number(newMRP)) || Number(newMRP) <= 0 || isNaN(Number(newDiscounted)) || Number(newDiscounted) <= 0 || isNaN(Number(newStock)) || Number(newStock) < 0 || isNaN(Number(newMinQty)) || Number(newMinQty) < 1) {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    deals[idx] = { ...item, name: newName.trim(), mrp: Number(newMRP), discounted: Number(newDiscounted), stock: Number(newStock), minQty: Number(newMinQty), validTill: newValidTill, category: newCategory, subcategory: newSubcategory, desc: newDesc };
+                    localStorage.setItem("today99deals", JSON.stringify(deals));
+                    renderAdminToday99Deals(document.getElementById("today99ProductSearch")?.value || "");
+                    alert("✅ Today99 deal updated!");
+                });
+            });
+        }
+        renderAdminToday99Deals();
+
+        // --- Search functionality for Today99 deals ---
+        document.getElementById("today99ProductSearch").addEventListener("input", function() {
+            renderAdminToday99Deals(this.value);
+            renderToday99ProductSelectList(this.value);
+        });
+
+        // --- Select products to list under Today ₹99 Deals ---
+        function getAllProductsForToday99Select() {
+            const liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+            const arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+            // Exclude products already in today99deals
+            const today99Deals = JSON.parse(localStorage.getItem("today99deals")) || [];
+            const today99Names = new Set(today99Deals.map(p => p.name));
+            const allProducts = [
+                ...liveProducts.map(p => ({...p, _source: "Live"})),
+                ...arrivals.map(p => ({...p, _source: "Arrivals"}))
+            ].filter(p => !today99Names.has(p.name));
+            // Remove duplicates by name
+            const uniqueProducts = [];
+            const seen = new Set();
+            for (const p of allProducts) {
+                if (!seen.has(p.name)) {
+                    uniqueProducts.push(p);
+                    seen.add(p.name);
+                }
+            }
+            return uniqueProducts;
+        }
+
+        let today99SelectCache = getAllProductsForToday99Select();
+        let selectedToday99Products = [];
+
+        function renderToday99ProductSelectList(filter = "") {
+            const listDiv = document.getElementById("today99ProductSelectList");
+            if (!listDiv) return;
+            let products = today99SelectCache;
+            if (filter) {
+                products = products.filter(p =>
+                    p.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    (p.category && p.category.toLowerCase().includes(filter.toLowerCase())) ||
+                    (p.subcategory && p.subcategory.toLowerCase().includes(filter.toLowerCase()))
+                );
+            }
+            if (products.length === 0) {
+                listDiv.innerHTML = "<div style='color:#888;padding:7px;'>No products found.</div>";
+                return;
+            }
+            listDiv.innerHTML = products.map((p, idx) => `
+                <label style="display:flex;align-items:center;gap:7px;margin-bottom:4px;cursor:pointer;">
+                    <input type="checkbox" class="today99-select-checkbox" value="${idx}" ${selectedToday99Products.includes(p.name) ? "checked" : ""} />
+                    <img src="${Array.isArray(p.img) ? p.img[0] : (p.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" style="width:28px;height:28px;border-radius:4px;object-fit:cover;">
+                    <span>
+                        <b>${p.name}</b>
+                        <small style="color:#888;">[${p._source}]</small>
+                        <small style="color:#888;">₹${p.price || p.discounted || 99}</small>
+                        <small style="color:#888;">${p.category || ""}${p.subcategory ? " / " + p.subcategory : ""}</small>
+                    </span>
+                </label>
+            `).join("");
+            listDiv.querySelectorAll(".today99-select-checkbox").forEach((cb, i) => {
+                cb.onchange = function() {
+                    const prod = products[Number(cb.value)];
+                    if (cb.checked) {
+                        if (!selectedToday99Products.includes(prod.name)) selectedToday99Products.push(prod.name);
+                    } else {
+                        selectedToday99Products = selectedToday99Products.filter(n => n !== prod.name);
+                    }
+                };
+            });
+        }
+        renderToday99ProductSelectList();
+
+        document.getElementById("addSelectedToToday99").onclick = function() {
+            const products = today99SelectCache.filter(p => selectedToday99Products.includes(p.name));
+            if (products.length === 0) {
+                alert("Please select at least one product.");
+                return;
+            }
+            let today99Deals = JSON.parse(localStorage.getItem("today99deals")) || [];
+            // Copy product and set discounted price to 99 by default if not present
+            products.forEach(p => {
+                today99Deals.push({
+                    ...p,
+                    discounted: p.discounted || 99,
+                    validTill: "",
+                    createdAt: new Date().toISOString()
+                });
+            });
+            localStorage.setItem("today99deals", JSON.stringify(today99Deals));
+            // Reset selection and refresh
+            selectedToday99Products = [];
+            today99SelectCache = getAllProductsForToday99Select();
+            renderToday99ProductSelectList();
+            renderAdminToday99Deals();
+            alert("✅ Selected products added to Today ₹99 Deals!");
+        };
+
+        // Refresh product cache and list when products change
+        window.addEventListener("storage", function(e) {
+            if (
+                e.key === "liveProducts" ||
+                e.key === "arrivals" ||
+                e.key === "today99deals"
+            ) {
+                today99SelectCache = getAllProductsForToday99Select();
+                renderToday99ProductSelectList(document.getElementById("today99ProductSearch").value);
+                renderAdminToday99Deals(document.getElementById("today99ProductSearch").value);
+            }
+        });
+
+        // --- Improved Order Management Section with Sorting, Pagination, and Details Modal ---
+let orderPage = 1;
+const ORDERS_PER_PAGE = 10;
+
+function renderAdminOrders(filterText = "", statusFilter = "", sortBy = "date_desc", page = 1) {
+    const adminOrders = document.getElementById("adminOrders");
+    if (!adminOrders) return;
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    // Filter by search text
+    if (filterText) {
+        const f = filterText.toLowerCase();
+        orders = orders.filter(order =>
+            (order.name && order.name.toLowerCase().includes(f)) ||
+            (order.email && order.email.toLowerCase().includes(f)) ||
+            (order.status && order.status.toLowerCase().includes(f)) ||
+            (order.address && order.address.toLowerCase().includes(f)) ||
+            (order.phone && order.phone.toLowerCase().includes(f))
+        );
+    }
+    // Filter by status
+    if (statusFilter) {
+        orders = orders.filter(order => (order.status || "Pending") === statusFilter);
+    }
+    // Sort
+    if (sortBy === "date_desc") {
+        orders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    } else if (sortBy === "date_asc") {
+        orders.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+    } else if (sortBy === "total_desc") {
+        orders.sort((a, b) => (b.total || 0) - (a.total || 0));
+    } else if (sortBy === "total_asc") {
+        orders.sort((a, b) => (a.total || 0) - (b.total || 0));
+    }
+
+    // Pagination
+    const totalPages = Math.ceil(orders.length / ORDERS_PER_PAGE) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    orderPage = page;
+    const startIdx = (page - 1) * ORDERS_PER_PAGE;
+    const pagedOrders = orders.slice(startIdx, startIdx + ORDERS_PER_PAGE);
+
+    if (orders.length === 0) {
+        adminOrders.innerHTML = "<p>No orders found.</p>";
+        return;
+    }
+    let html = `<table class="admin-list-table"><thead>
+        <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Notes</th>
+            <th>Actions</th>
+        </tr>
+    </thead><tbody>`;
+    pagedOrders.forEach((order, idx) => {
+        const status = order.status || "Pending";
+        const statusColor =
+            status === "Delivered" ? "#27ae60" :
+            status === "Shipped" ? "#f1c40f" :
+            status === "Cancelled" ? "#e63946" : "#e67e22";
+        const date = order.date ? new Date(order.date).toLocaleString() : "";
+        html += `<tr>
+            <td>${startIdx + idx + 1}</td>
+            <td>${date}</td>
+            <td>${order.name || ""}</td>
+            <td>${order.email || ""}</td>
+            <td>${order.phone || ""}</td>
+            <td style="max-width:180px;white-space:pre-line;">${order.address || ""}</td>
+            <td>
+                <button class="admin-action-btn" onclick="showOrderDetails(${startIdx + idx})" title="View Details"><i class="fas fa-eye"></i></button>
+            </td>
+            <td>₹${order.total || 0}</td>
+            <td>
+                <span style="color:${statusColor};font-weight:bold;">${status}</span>
+            </td>
+            <td>
+                <input type="text" value="${order.notes || ""}" data-idx="${startIdx + idx}" class="order-notes-input" style="width:110px;padding:3px 5px;border-radius:3px;border:1px solid #ccc;">
+            </td>
+            <td>
+                <button class="admin-action-btn" onclick="updateOrderStatus(${startIdx + idx}, 'Shipped')">Shipped</button>
+                <button class="admin-action-btn" onclick="updateOrderStatus(${startIdx + idx}, 'Delivered')">Delivered</button>
+                <button class="admin-action-btn" onclick="updateOrderStatus(${startIdx + idx}, 'Cancelled')" style="background:#e63946;">Cancel</button>
+                <button class="admin-action-btn remove" onclick="removeOrder(${startIdx + idx})">Remove</button>
+            </td>
+        </tr>`;
+    });
+    html += "</tbody></table>";
+
+    // Pagination controls
+    html += `<div style="display:flex;justify-content:center;align-items:center;gap:10px;margin:10px 0;">
+        <button onclick="gotoOrderPage(1)" ${page === 1 ? "disabled" : ""}>&laquo; First</button>
+        <button onclick="gotoOrderPage(${page - 1})" ${page === 1 ? "disabled" : ""}>&lsaquo; Prev</button>
+        <span>Page ${page} of ${totalPages}</span>
+        <button onclick="gotoOrderPage(${page + 1})" ${page === totalPages ? "disabled" : ""}>Next &rsaquo;</button>
+        <button onclick="gotoOrderPage(${totalPages})" ${page === totalPages ? "disabled" : ""}>Last &raquo;</button>
+    </div>`;
+
+    adminOrders.innerHTML = html;
+
+    // Notes update
+    adminOrders.querySelectorAll(".order-notes-input").forEach(input => {
+        input.addEventListener("change", function() {
+            let orders = JSON.parse(localStorage.getItem("orders")) || [];
+            const idx = Number(this.dataset.idx);
+            orders[idx].notes = this.value;
+            localStorage.setItem("orders", JSON.stringify(orders));
+        });
+    });
+}
+
+// Pagination navigation
+function gotoOrderPage(page) {
+    renderAdminOrders(
+        document.getElementById("orderSearch").value,
+        document.getElementById("orderStatusFilter").value,
+        document.getElementById("orderSort").value,
+        page
+    );
+}
+
+// Order details modal
+function showOrderDetails(idx) {
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+    const order = orders[idx];
+    if (!order) return;
+    let itemsHtml = (order.items || []).map(i =>
+        `<li>${i.name} <span style="color:#888;">(₹${i.price})</span> x${i.qty || 1}</li>`
+    ).join("");
+    const modal = document.createElement("div");
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100vw";
+    modal.style.height = "100vh";
+    modal.style.background = "#0008";
+    modal.style.zIndex = "9999";
+    modal.innerHTML = `
+      <div style="background:#fff;max-width:400px;margin:60px auto;padding:24px;border-radius:10px;box-shadow:0 4px 24px #0002;position:relative;">
+        <button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:#e63946;color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:1.2em;cursor:pointer;">&times;</button>
+        <h3 style="color:#1d3557;margin-bottom:10px;">Order Details</h3>
+        <div><b>Name:</b> ${order.name || ""}</div>
+        <div><b>Email:</b> ${order.email || ""}</div>
+        <div><b>Phone:</b> ${order.phone || ""}</div>
+        <div><b>Address:</b> <pre style="display:inline;font-family:inherit;">${order.address || ""}</pre></div>
+        <div><b>Date:</b> ${order.date ? new Date(order.date).toLocaleString() : ""}</div>
+        <div><b>Status:</b> ${order.status || "Pending"}</div>
+        <div><b>Notes:</b> ${order.notes || ""}</div>
+        <div style="margin:10px 0;"><b>Items:</b>
+          <ul style="padding-left:18px;margin:0;">${itemsHtml}</ul>
+        </div>
+        <div><b>Total:</b> ₹${order.total || 0}</div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Remove order
+function removeOrder(idx) {
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+    if (!confirm("Are you sure you want to remove this order?")) return;
+    orders.splice(idx, 1);
+    localStorage.setItem("orders", JSON.stringify(orders));
+    renderAdminOrders(
+        document.getElementById("orderSearch").value,
+        document.getElementById("orderStatusFilter").value,
+        document.getElementById("orderSort").value,
+        orderPage
+    );
+}
+
+// Update order status
+function updateOrderStatus(idx, status) {
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+    if (!orders[idx]) return;
+    orders[idx].status = status;
+    localStorage.setItem("orders", JSON.stringify(orders));
+    renderAdminOrders(
+        document.getElementById("orderSearch").value,
+        document.getElementById("orderStatusFilter").value,
+        document.getElementById("orderSort").value,
+        orderPage
+    );
+}
+
+// Export orders as CSV
+document.getElementById("exportOrdersBtn").onclick = function() {
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+    if (!orders.length) return alert("No orders to export.");
+    let csv = "Order#,Date,Name,Email,Phone,Address,Items,Total,Status,Notes\n";
+    orders.forEach((order, idx) => {
+        const items = (order.items || []).map(i => `${i.name} (₹${i.price}) x${i.qty || 1}`).join(" | ");
+        csv += [
+            idx + 1,
+            `"${order.date ? new Date(order.date).toLocaleString() : ""}"`,
+            `"${order.name || ""}"`,
+            `"${order.email || ""}"`,
+            `"${order.phone || ""}"`,
+            `"${order.address || ""}"`,
+            `"${items}"`,
+            `"₹${order.total || 0}"`,
+            `"${order.status || "Pending"}"`,
+            `"${order.notes || ""}"`
+        ].join(",") + "\n";
+    });
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "orders.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
+
+// Clear all orders
+document.getElementById("clearOrdersBtn").onclick = function() {
+    if (confirm("Are you sure you want to delete ALL orders? This cannot be undone.")) {
+        localStorage.removeItem("orders");
+        renderAdminOrders();
+    }
+};
+
+// Search, filter, sort listeners
+document.getElementById("orderSearch").addEventListener("input", function() {
+    renderAdminOrders(
+        this.value,
+        document.getElementById("orderStatusFilter").value,
+        document.getElementById("orderSort").value,
+        1
+    );
+});
+document.getElementById("orderStatusFilter").addEventListener("change", function() {
+    renderAdminOrders(
+        document.getElementById("orderSearch").value,
+        this.value,
+        document.getElementById("orderSort").value,
+        1
+    );
+});
+document.getElementById("orderSort").addEventListener("change", function() {
+    renderAdminOrders(
+        document.getElementById("orderSearch").value,
+        document.getElementById("orderStatusFilter").value,
+        this.value,
+        1
+    );
+});
+
+// Initial render
+renderAdminOrders();
+    </script>
+</body>
+</html>

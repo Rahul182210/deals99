@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Categories | Deals99</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    .category-section { margin-bottom: 48px; }
+    .category-section h2 { color: #1d3557; margin-bottom: 18px; }
+    .subcat-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .subcat-link {
+      background: #f3f7fa;
+      color: #1d3557;
+      border-radius: 6px;
+      padding: 5px 14px;
+      text-decoration: none;
+      font-weight: 500;
+      border: 1px solid #e0e0e0;
+      transition: background 0.18s, color 0.18s;
+      cursor: pointer;
+      font-size: 0.97em;
+    }
+    .subcat-link:hover {
+      background: #ff3e6c;
+      color: #fff;
+    }
+    .products-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 12px;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px #0001;
+      padding: 14px;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.18s, transform 0.13s;
+      position: relative;
+    }
+    .product-card:hover {
+      box-shadow: 0 8px 28px #ff3e6c22;
+      transform: translateY(-4px) scale(1.04);
+    }
+    .product-card img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #f7f7fa;
+    }
+    .product-info {
+      text-align: center;
+    }
+    .product-info strong {
+      color: #1d3557;
+      font-size: 1.08em;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .product-info div {
+      margin-bottom: 2px;
+    }
+    .add-to-cart-btn, .add-to-wishlist-btn, .quick-view-btn {
+      margin-top: 8px;
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 7px 16px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.18s;
+      margin-right: 6px;
+    }
+    .add-to-cart-btn:hover, .add-to-wishlist-btn:hover, .quick-view-btn:hover {
+      background: #ff3e6c;
+    }
+    .add-to-wishlist-btn {
+      background: #fff;
+      color: #e63946;
+      border: 1px solid #e63946;
+      margin-right: 0;
+    }
+    .add-to-wishlist-btn:hover {
+      background: #e63946;
+      color: #fff;
+    }
+    .quick-view-btn {
+      background: #fff;
+      color: #457b9d;
+      border: 1px solid #457b9d;
+      margin-top: 6px;
+    }
+    .quick-view-btn:hover {
+      background: #457b9d;
+      color: #fff;
+    }
+    .wishlist-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #ff3e6c;
+      color: #fff;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1em;
+      font-weight: bold;
+      z-index: 2;
+      box-shadow: 0 2px 8px #0002;
+    }
+    .category-search-bar {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      align-items: center;
+    }
+    .category-search-bar input {
+      padding: 7px 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 240px;
+      font-size: 1em;
+    }
+    .category-search-bar button {
+      padding: 7px 16px;
+      border-radius: 5px;
+      border: none;
+      background: #457b9d;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .category-search-bar button:hover { background: #1d3557; }
+    @media (max-width: 700px) {
+      .products-flex { gap: 12px; }
+      .product-card { width: 100%; min-width: 0; }
+      .subcat-list { flex-direction: column; gap: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 style="text-align:center;margin:32px 0 18px 0;">All Categories</h1>
+  </header>
+  <div class="category-search-bar">
+    <input type="text" id="categorySearchInput" placeholder="Search products, categories, subcategories...">
+    <button id="categorySearchBtn"><i class="fas fa-search"></i> Search</button>
+    <button id="categoryClearBtn" style="background:#e63946;"><i class="fas fa-times"></i> Clear</button>
+  </div>
+  <main id="categoriesMain"></main>
+  <div id="quickViewModalBg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0008;"></div>
+  <script>
+    // --- Category to subcategories mapping (with "All" option for each)
+    const categorySubcategories = {
+      "Fashion": [
+        "Men's T-Shirts", "Women's Dresses", "Kids Wear", "Accessories", "Ethnic Wear", "Footwear", "Bags & Wallets", "All"
+      ],
+      "Electronics": [
+        "Mobiles", "Laptops", "Earphones", "Smart Watches", "Tablets", "Power Banks", "Speakers", "All"
+      ],
+      "Keychains": [
+        "Superhero Keychains", "Name Keychains", "Photo Keychains", "Metal Keychains", "Wooden Keychains", "Cartoon Keychains", "All"
+      ],
+      "Gifts": [
+        "Birthday Gifts", "Anniversary Gifts", "Personalized Gifts", "Gift Hampers", "Greeting Cards", "Flowers", "All"
+      ],
+      "Other": [
+        "Home Decor", "Stationery", "Toys", "Kitchenware", "Fitness", "Other", "All"
+      ]
+    };
+
+    // --- Wishlist utility ---
+    function getWishlist() {
+      return JSON.parse(localStorage.getItem("wishlist")) || [];
+    }
+    function setWishlist(arr) {
+      localStorage.setItem("wishlist", JSON.stringify(arr));
+    }
+
+    // --- Render all categories and live products under each, with search ---
+    function renderCategoriesWithProducts(search = "") {
+      const categories = [
+        { name: "Fashion", icon: "fa-tshirt", desc: "Clothing, Accessories" },
+        { name: "Electronics", icon: "fa-laptop", desc: "Mobiles, Gadgets" },
+        { name: "Keychains", icon: "fa-key", desc: "Customized, Cool" },
+        { name: "Gifts", icon: "fa-gift", desc: "Surprise Gifts" },
+        { name: "Other", icon: "fa-star", desc: "More Deals" }
+      ];
+      const liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+      const wishlist = getWishlist();
+      const grouped = {};
+      liveProducts.forEach(item => {
+        const cat = item.category || "Other";
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(item);
+      });
+      const main = document.getElementById("categoriesMain");
+      main.innerHTML = "";
+      categories.forEach(cat => {
+        let products = grouped[cat.name] || [];
+        // Filter by search if needed
+        if (search) {
+          const s = search.toLowerCase();
+          products = products.filter(item =>
+            (item.name && item.name.toLowerCase().includes(s)) ||
+            (item.desc && item.desc.toLowerCase().includes(s)) ||
+            (item.category && item.category.toLowerCase().includes(s)) ||
+            (item.subcategory && item.subcategory.toLowerCase().includes(s))
+          );
+        }
+        const subcats = categorySubcategories[cat.name] || [];
+        const section = document.createElement("section");
+        section.className = "category-section";
+        section.innerHTML = `
+          <h2>
+            <i class="fas ${cat.icon}" style="margin-right:10px;color:#ff3e6c;"></i>
+            ${cat.name}
+            <span style="font-size:1rem;color:#888;font-weight:400;">${cat.desc}</span>
+          </h2>
+          <div class="subcat-list">
+            ${subcats.map(s =>
+              `<a class="subcat-link" href="subcategory.html?subcat=${encodeURIComponent(s)}&cat=${encodeURIComponent(cat.name)}">${s}</a>`
+            ).join("")}
+          </div>
+          <div class="products-flex">
+            ${
+              products.length
+                ? products.map(item => `
+                  <div class="product-card">
+                    ${wishlist.includes(item.name) ? `<div class="wishlist-badge" title="In Wishlist"><i class="fas fa-heart"></i></div>` : ""}
+                    <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" alt="${item.name}" />
+                    <div class="product-info">
+                      <strong>${item.name}</strong>
+                      <div>₹${item.price}</div>
+                      ${
+                        (typeof item.stock === "number" && item.stock < 5)
+                          ? `<div style="color:#e67e22;font-size:0.97em;font-weight:500;">Few pieces left!</div>`
+                          : ""
+                      }
+                      <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+                      <button class="add-to-cart-btn" onclick="addToCart('${item.name.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                      </button>
+                      <button class="add-to-wishlist-btn" onclick="addToWishlist('${item.name.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-heart"></i> Wishlist
+                      </button>
+                      <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-eye"></i> Quick View
+                      </button>
+                    </div>
+                  </div>
+                `).join("")
+                : `<div style="color:#aaa;font-size:1.05em;">No products${search ? " found for your search." : " in this category yet."}</div>`
+            }
+          </div>
+        `;
+        main.appendChild(section);
+      });
+    }
+
+    // --- Add to Cart functionality ---
+    function addToCart(productName) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(productName);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`🛒 "${productName}" added to cart!`);
+    }
+    window.addToCart = addToCart;
+
+    // --- Add to Wishlist ---
+    function addToWishlist(productName) {
+      let wishlist = getWishlist();
+      if (!wishlist.includes(productName)) {
+        wishlist.push(productName);
+        setWishlist(wishlist);
+        alert(`❤️ "${productName}" added to wishlist!`);
+        renderCategoriesWithProducts(document.getElementById("categorySearchInput").value.trim());
+      } else {
+        alert(`"${productName}" is already in your wishlist!`);
+      }
+    }
+    window.addToWishlist = addToWishlist;
+
+    // --- Quick View Modal ---
+    function quickViewProduct(productName) {
+      const liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+      const prod = liveProducts.find(p => p.name === productName);
+      if (!prod) return;
+      document.getElementById("quickViewModalBg").innerHTML = `
+        <div class="login-modal-bg" onclick="closeQuickViewModal(event)">
+          <div class="login-modal" style="max-width:400px;" onclick="event.stopPropagation();">
+            <button class="close-btn" onclick="closeQuickViewModal(event);return false;">&times;</button>
+            <h2>${prod.name}</h2>
+            <img src="${Array.isArray(prod.img) ? prod.img[0] : (prod.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${prod.name}" style="width:120px;height:120px;object-fit:contain;margin:10px auto;display:block;">
+            <div style="margin:10px 0;">
+              ${prod.mrp && prod.mrp != prod.price ? `<span style="text-decoration:line-through;color:#888;">₹${prod.mrp}</span> ` : ""}
+              <span style="color:#ff3e6c;font-weight:bold;">₹${prod.price}</span>
+            </div>
+            <div style="color:#888;font-size:1em;margin-bottom:10px;">${prod.desc || ""}</div>
+            <button class="add-to-cart-btn" onclick="addToCart('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+            <button class="add-to-wishlist-btn" onclick="addToWishlist('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-heart"></i> Wishlist
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById("quickViewModalBg").style.display = "flex";
+    }
+    window.quickViewProduct = quickViewProduct;
+
+    function closeQuickViewModal(e) {
+      if (e) e.preventDefault();
+      document.getElementById("quickViewModalBg").style.display = "none";
+      document.getElementById("quickViewModalBg").innerHTML = "";
+    }
+    window.closeQuickViewModal = closeQuickViewModal;
+
+    // --- Search bar events ---
+    document.getElementById("categorySearchBtn").onclick = function() {
+      renderCategoriesWithProducts(document.getElementById("categorySearchInput").value.trim());
+    };
+    document.getElementById("categorySearchInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("categorySearchBtn").click();
+      }
+    });
+    document.getElementById("categoryClearBtn").onclick = function() {
+      document.getElementById("categorySearchInput").value = "";
+      renderCategoriesWithProducts();
+    };
+
+    document.addEventListener("DOMContentLoaded", function() {
+      renderCategoriesWithProducts();
+    });
+  </script>
+</body>
+</html>

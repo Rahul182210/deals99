@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Cart | Deals99</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
+  <style>
+    .cart-summary { margin: 20px 0; padding: 10px; background: #f8f8f8; border-radius: 6px; }
+    .cart-summary ul { padding-left: 20px; }
+    .cart-summary li { margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .cart-empty { color: #888; font-style: italic; }
+    .cart-actions { margin-top: 20px; display: flex; gap: 12px; align-items: center; }
+    .cart-actions button {
+      background: #1d3557;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 9px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s;
+      font-weight: 500;
+    }
+    .cart-actions button:disabled {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+    .cart-actions button:hover:not(:disabled), .cart-actions button:focus:not(:disabled) {
+      background: #457b9d;
+      transform: translateY(-2px) scale(1.04);
+    }
+    .cart-total { font-weight: bold; margin-top: 10px; }
+    .cart-qty-btn {
+      background: #f1f1f1;
+      color: #1d3557;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      padding: 2px 10px;
+      font-size: 1.1em;
+      margin: 0 2px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .cart-qty-btn:hover { background: #e0e0e0; }
+    .cart-remove-btn {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 10px;
+      font-size: 0.98em;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .cart-remove-btn:hover { background: #c0392b; }
+    .cart-save-btn {
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 10px;
+      font-size: 0.98em;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .cart-save-btn:hover { background: #2980b9; }
+    .cart-stock-warning {
+      color: #e67e22;
+      font-size: 0.95em;
+      margin-left: 8px;
+    }
+    .cart-product-img {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: 1px solid #eee;
+      background: #fafbfc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Your Shopping Cart</h2>
+    <div class="cart-summary" id="cartItems"></div>
+    <div class="cart-actions">
+      <button id="clearCartBtn" type="button"><i class="fas fa-trash"></i> Clear Cart</button>
+      <button id="checkoutBtn" type="button"><i class="fas fa-credit-card"></i> Go to Checkout</button>
+      <a href="index.html" style="text-decoration:underline;">&#8592; Continue Shopping</a>
+    </div>
+  </div>
+  <script>
+  // --- Utility: Get all products from all sources ---
+  function getAllProducts() {
+    const live = JSON.parse(localStorage.getItem("liveProducts")) || [];
+    const arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+    const today99 = JSON.parse(localStorage.getItem("today99deals")) || [];
+    const all = [...live, ...arrivals, ...today99];
+    const seen = new Set();
+    return all.filter(p => {
+      if (seen.has(p.name)) return false;
+      seen.add(p.name);
+      return true;
+    });
+  }
+
+  // --- Render cart items and total with quantity, image, and "Save for Later" ---
+  function renderCart() {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let saved = JSON.parse(localStorage.getItem("savedForLater")) || [];
+    const allProducts = getAllProducts();
+    // Count quantities
+    const cartMap = {};
+    cart.forEach(itemName => {
+      cartMap[itemName] = (cartMap[itemName] || 0) + 1;
+    });
+    const cartDiv = document.getElementById("cartItems");
+    if (!cart.length) {
+      cartDiv.innerHTML = `<div class="cart-empty">Your cart is empty.</div>`;
+      document.getElementById("checkoutBtn").disabled = true;
+      document.getElementById("clearCartBtn").disabled = true;
+    } else {
+      let total = 0;
+      let itemsHtml = "";
+      Object.entries(cartMap).forEach(([itemName, qty], idx) => {
+        const found = allProducts.find(a => a.name === itemName);
+        let price = found ? Number(found.price || found.discounted || 0) : 0;
+        let stock = found && found.stock !== undefined ? Number(found.stock) : null;
+        let img = found && found.img ? (Array.isArray(found.img) ? found.img[0] : found.img) : 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png';
+        let stockWarn = stock !== null && qty > stock
+          ? `<span class="cart-stock-warning">(Only ${stock} left!)</span>` : "";
+        itemsHtml += `<li>
+          <img src="${img}" alt="${itemName}" class="cart-product-img"/>
+          <span style="flex:1;"><strong>${itemName}</strong> - ₹${price} x 
+            <button class="cart-qty-btn" onclick="changeQty('${itemName}', -1)">-</button>
+            <span id="qty-${idx}">${qty}</span>
+            <button class="cart-qty-btn" onclick="changeQty('${itemName}', 1)">+</button>
+            ${stockWarn}
+          </span>
+          <button class="cart-remove-btn" onclick="removeAllOfItem('${itemName}')">Remove All</button>
+          <button class="cart-save-btn" onclick="saveForLater('${itemName}')">Save for Later</button>
+        </li>`;
+        total += price * qty;
+      });
+      cartDiv.innerHTML = `
+        <ul>${itemsHtml}</ul>
+        <div class="cart-total">Total: ₹${total}</div>
+      `;
+      document.getElementById("checkoutBtn").disabled = false;
+      document.getElementById("clearCartBtn").disabled = false;
+    }
+
+    // --- Saved for Later section ---
+    const savedDivId = "savedForLaterSection";
+    let savedDiv = document.getElementById(savedDivId);
+    if (!savedDiv) {
+      savedDiv = document.createElement("div");
+      savedDiv.id = savedDivId;
+      cartDiv.parentNode.insertBefore(savedDiv, cartDiv.nextSibling);
+    }
+    if (saved.length) {
+      let savedHtml = `<h3 style="margin-top:30px;">Saved for Later</h3><ul>`;
+      saved.forEach(itemName => {
+        const found = allProducts.find(a => a.name === itemName);
+        let price = found ? Number(found.price || found.discounted || 0) : 0;
+        let img = found && found.img ? (Array.isArray(found.img) ? found.img[0] : found.img) : 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png';
+        savedHtml += `<li>
+          <img src="${img}" alt="${itemName}" class="cart-product-img"/>
+          <span style="flex:1;"><strong>${itemName}</strong> - ₹${price}</span>
+          <button class="cart-save-btn" onclick="moveToCart('${itemName}')">Move to Cart</button>
+          <button class="cart-remove-btn" onclick="removeFromSaved('${itemName}')">Remove</button>
+        </li>`;
+      });
+      savedHtml += `</ul>`;
+      savedDiv.innerHTML = savedHtml;
+    } else {
+      savedDiv.innerHTML = "";
+    }
+  }
+
+  // Change quantity of an item
+  function changeQty(itemName, delta) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const allProducts = getAllProducts();
+    const found = allProducts.find(a => a.name === itemName);
+    let stock = found && found.stock !== undefined ? Number(found.stock) : null;
+    if (delta > 0 && stock !== null) {
+      // Check stock limit
+      const count = cart.filter(i => i === itemName).length;
+      if (count >= stock) {
+        alert("No more stock available for this product.");
+        return;
+      }
+    }
+    if (delta > 0) {
+      cart.push(itemName);
+    } else {
+      const idx = cart.indexOf(itemName);
+      if (idx !== -1) cart.splice(idx, 1);
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+    if (typeof updateCartIcon === "function") updateCartIcon();
+    if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+  }
+  window.changeQty = changeQty;
+
+  // Remove all of an item from cart
+  function removeAllOfItem(itemName) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart = cart.filter(i => i !== itemName);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+    if (typeof updateCartIcon === "function") updateCartIcon();
+    if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+  }
+  window.removeAllOfItem = removeAllOfItem;
+
+  // Save item for later
+  function saveForLater(itemName) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let saved = JSON.parse(localStorage.getItem("savedForLater")) || [];
+    cart = cart.filter(i => i !== itemName);
+    if (!saved.includes(itemName)) saved.push(itemName);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem("savedForLater", JSON.stringify(saved));
+    renderCart();
+    alert(`"${itemName}" saved for later!`);
+  }
+  window.saveForLater = saveForLater;
+
+  // Move item from saved for later to cart
+  function moveToCart(itemName) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let saved = JSON.parse(localStorage.getItem("savedForLater")) || [];
+    if (!cart.includes(itemName)) cart.push(itemName);
+    saved = saved.filter(i => i !== itemName);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem("savedForLater", JSON.stringify(saved));
+    renderCart();
+    alert(`"${itemName}" moved to cart!`);
+  }
+  window.moveToCart = moveToCart;
+
+  // Remove from saved for later
+  function removeFromSaved(itemName) {
+    let saved = JSON.parse(localStorage.getItem("savedForLater")) || [];
+    saved = saved.filter(i => i !== itemName);
+    localStorage.setItem("savedForLater", JSON.stringify(saved));
+    renderCart();
+  }
+  window.removeFromSaved = removeFromSaved;
+
+  // Remove item by index (legacy, for compatibility)
+  function removeItem(idx) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.splice(idx, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+    if (typeof updateCartIcon === "function") updateCartIcon();
+    if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+  }
+  window.removeItem = removeItem;
+
+  // Clear cart
+  document.addEventListener("DOMContentLoaded", function() {
+    renderCart();
+    if (typeof updateCartIcon === "function") updateCartIcon();
+    if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+
+    document.getElementById("clearCartBtn").onclick = function() {
+      if (confirm("Are you sure you want to clear your cart?")) {
+        localStorage.removeItem("cart");
+        renderCart();
+        if (typeof updateCartIcon === "function") updateCartIcon();
+        if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+      }
+    };
+    document.getElementById("checkoutBtn").onclick = function() {
+      location.href = "checkout.html";
+    };
+  });
+</script>
+</body>
+</html>

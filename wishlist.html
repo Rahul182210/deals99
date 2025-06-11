@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Wishlist | Deals99</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { background: #f8f9fa; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
+    .wishlist-container { max-width: 900px; margin: 40px auto 0 auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px #0001; }
+    .wishlist-title { font-size: 2em; color: #1d3557; margin-bottom: 18px; }
+    .wishlist-list { display: flex; flex-wrap: wrap; gap: 18px; }
+    .wishlist-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 16px;
+      width: 220px;
+      text-align: center;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.2s;
+    }
+    .wishlist-card:hover { box-shadow: 0 6px 24px #0002; }
+    .wishlist-card img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 8px; border-radius: 8px; background: #f8f8f8; }
+    .wishlist-card .remove-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: #e63946; color: #fff; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 1em;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.18s;
+    }
+    .wishlist-card .remove-btn:hover { background: #b71c1c; }
+    .wishlist-card .add-to-cart-btn, .wishlist-card .buy-now-btn, .wishlist-card .quick-view-btn {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      background: #1d3557;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.97em;
+      transition: background 0.2s;
+      margin-right: 6px;
+    }
+    .wishlist-card .add-to-cart-btn:hover, .wishlist-card .buy-now-btn:hover, .wishlist-card .quick-view-btn:hover { background: #ff3e6c; }
+    .wishlist-card .wishlist-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      color: #e63946;
+      font-size: 1.2em;
+      background: #fff;
+      border-radius: 50%;
+      padding: 2px 6px;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .wishlist-empty { color: #888; text-align: center; font-size: 1.2em; margin: 40px 0; }
+    .wishlist-search-bar {
+      margin-bottom: 18px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .wishlist-search-bar input {
+      padding: 7px 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 240px;
+      font-size: 1em;
+    }
+    .wishlist-search-bar button {
+      padding: 7px 16px;
+      border-radius: 5px;
+      border: none;
+      background: #457b9d;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .wishlist-search-bar button:hover { background: #1d3557; }
+    .wishlist-card .wishlist-btn {
+      background: #fff;
+      color: #e63946;
+      border: 1px solid #e63946;
+      border-radius: 5px;
+      padding: 6px 12px;
+      margin-top: 6px;
+      font-size: 0.98em;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      margin-right: 0;
+    }
+    .wishlist-card .wishlist-btn.active, .wishlist-card .wishlist-btn:hover {
+      background: #e63946;
+      color: #fff;
+    }
+    @media (max-width: 700px) {
+      .wishlist-list { flex-direction: column; gap: 12px; }
+      .wishlist-card { width: 100%; }
+      .wishlist-container { padding: 10px; }
+      .wishlist-search-bar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wishlist-container">
+    <div class="wishlist-title"><i class="fas fa-heart"></i> My Wishlist</div>
+    <div class="wishlist-search-bar">
+      <input type="text" id="wishlistSearchInput" placeholder="Search wishlist...">
+      <button id="wishlistSearchBtn"><i class="fas fa-search"></i> Search</button>
+      <button id="clearWishlistBtn" style="background:#e63946;"><i class="fas fa-trash"></i> Clear All</button>
+    </div>
+    <div id="wishlistList" class="wishlist-list"></div>
+    <div id="wishlistEmpty" class="wishlist-empty" style="display:none;">Your wishlist is empty.</div>
+    <div style="margin-top:30px;">
+      <a href="index.html" style="color:#1d3557;text-decoration:underline;font-size:1.1em;"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
+    </div>
+  </div>
+  <div id="quickViewModalBg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0008;"></div>
+  <script>
+    // --- Utility functions ---
+    function getWishlist() {
+      return JSON.parse(localStorage.getItem("wishlist")) || [];
+    }
+    function setWishlist(arr) {
+      localStorage.setItem("wishlist", JSON.stringify(arr));
+    }
+    function getAllProducts() {
+      const live = JSON.parse(localStorage.getItem("liveProducts")) || [];
+      const arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+      const today99 = JSON.parse(localStorage.getItem("today99deals")) || [];
+      const deal99 = JSON.parse(localStorage.getItem("deal99Products")) || [];
+      const all = [...live, ...arrivals, ...today99, ...deal99];
+      const seen = new Set();
+      return all.filter(p => {
+        if (seen.has(p.name)) return false;
+        seen.add(p.name);
+        return true;
+      });
+    }
+
+    // --- Render Wishlist ---
+    function renderWishlist(search = "") {
+      const wishlist = getWishlist();
+      const allProducts = getAllProducts();
+      const listDiv = document.getElementById("wishlistList");
+      const emptyDiv = document.getElementById("wishlistEmpty");
+      listDiv.innerHTML = "";
+      let filtered = wishlist;
+      if (search) {
+        filtered = wishlist.filter(name => {
+          const p = allProducts.find(p => p.name === name);
+          return p && (
+            p.name.toLowerCase().includes(search) ||
+            (p.desc && p.desc.toLowerCase().includes(search)) ||
+            (p.category && p.category.toLowerCase().includes(search))
+          );
+        });
+      }
+      if (!filtered.length) {
+        emptyDiv.style.display = "block";
+        return;
+      }
+      emptyDiv.style.display = "none";
+      filtered.forEach(name => {
+        const product = allProducts.find(p => p.name === name) || { name, price: "—", img: "", desc: "", mrp: "", category: "" };
+        listDiv.innerHTML += `
+          <div class="wishlist-card">
+            <div class="wishlist-badge" title="In Wishlist"><i class="fas fa-heart"></i></div>
+            <button class="remove-btn" title="Remove from wishlist" onclick="removeFromWishlist('${name.replace(/'/g,"\\'")}')"><i class="fas fa-times"></i></button>
+            <img src="${product.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" alt="${product.name}" />
+            <strong>${product.name}</strong>
+            <div>
+              ${product.mrp && product.mrp != product.price ? `<span style="text-decoration:line-through;color:#888;">₹${product.mrp}</span> ` : ""}
+              <span style="color:#ff3e6c;font-weight:bold;">₹${product.price || "—"}</span>
+            </div>
+            <div style="font-size:0.95em;color:#888;">${product.desc || ""}</div>
+            <button class="add-to-cart-btn" onclick="addToCart('${product.name.replace(/'/g,"\\'")}')"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+            <button class="buy-now-btn" onclick="buyNow('${product.name.replace(/'/g,"\\'")}')">Buy Now</button>
+            <button class="quick-view-btn" onclick="quickViewProduct('${product.name.replace(/'/g,"\\'")}')"><i class="fas fa-eye"></i> Quick View</button>
+            <button class="wishlist-btn active" onclick="toggleWishlist('${product.name.replace(/'/g,"\\'")}')" title="Remove from wishlist"><i class="fas fa-heart"></i></button>
+          </div>
+        `;
+      });
+    }
+
+    // --- Remove from Wishlist / Toggle Wishlist ---
+    function removeFromWishlist(name) {
+      toggleWishlist(name);
+    }
+    function toggleWishlist(name) {
+      let wishlist = getWishlist();
+      if (wishlist.includes(name)) {
+        wishlist = wishlist.filter(n => n !== name);
+      } else {
+        wishlist.push(name);
+      }
+      setWishlist(wishlist);
+      renderWishlist(document.getElementById("wishlistSearchInput").value.trim().toLowerCase());
+    }
+    window.removeFromWishlist = removeFromWishlist;
+    window.toggleWishlist = toggleWishlist;
+
+    // --- Add to Cart ---
+    function addToCart(productName) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(productName);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`🛒 "${productName}" added to cart!`);
+      if (typeof updateCartIcon === "function") updateCartIcon();
+      if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+    }
+    window.addToCart = addToCart;
+
+    // --- Buy Now ---
+    function buyNow(productName) {
+      addToCart(productName);
+      window.location.href = "cart.html";
+    }
+    window.buyNow = buyNow;
+
+    // --- Quick View Modal ---
+    function quickViewProduct(productName) {
+      const allProducts = getAllProducts();
+      const prod = allProducts.find(p => p.name === productName);
+      if (!prod) return;
+      document.getElementById("quickViewModalBg").innerHTML = `
+        <div class="login-modal-bg" onclick="closeQuickViewModal(event)">
+          <div class="login-modal" style="max-width:400px;" onclick="event.stopPropagation();">
+            <button class="close-btn" onclick="closeQuickViewModal(event);return false;">&times;</button>
+            <h2>${prod.name}</h2>
+            <img src="${Array.isArray(prod.img) ? prod.img[0] : (prod.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${prod.name}" style="width:120px;height:120px;object-fit:contain;margin:10px auto;display:block;">
+            <div style="margin:10px 0;">
+              ${prod.mrp && prod.mrp != prod.price ? `<span style="text-decoration:line-through;color:#888;">₹${prod.mrp}</span> ` : ""}
+              <span style="color:#ff3e6c;font-weight:bold;">₹${prod.price}</span>
+            </div>
+            <div style="color:#888;font-size:1em;margin-bottom:10px;">${prod.desc || ""}</div>
+            <button class="add-to-cart-btn" onclick="addToCart('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+            <button class="buy-now-btn" onclick="buyNow('${prod.name.replace(/'/g,"\\'")}')">Buy Now</button>
+            <button class="wishlist-btn${getWishlist().includes(prod.name) ? ' active' : ''}" onclick="toggleWishlist('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-heart"></i> ${getWishlist().includes(prod.name) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById("quickViewModalBg").style.display = "flex";
+    }
+    window.quickViewProduct = quickViewProduct;
+
+    function closeQuickViewModal(e) {
+      if (e) e.preventDefault();
+      document.getElementById("quickViewModalBg").style.display = "none";
+      document.getElementById("quickViewModalBg").innerHTML = "";
+    }
+    window.closeQuickViewModal = closeQuickViewModal;
+
+    // --- Wishlist Search & Clear All ---
+    document.getElementById("wishlistSearchBtn").onclick = function() {
+      const query = document.getElementById("wishlistSearchInput").value.trim().toLowerCase();
+      renderWishlist(query);
+    };
+    document.getElementById("wishlistSearchInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("wishlistSearchBtn").click();
+      }
+    });
+    document.getElementById("clearWishlistBtn").onclick = function() {
+      if (confirm("Are you sure you want to clear your entire wishlist?")) {
+        setWishlist([]);
+        renderWishlist();
+      }
+    };
+
+    // --- Initial render ---
+    renderWishlist();
+  </script>
+</body>
+</html>

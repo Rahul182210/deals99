@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Account | Deals99</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { background: #f8f9fa; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
+    .account-container { max-width: 500px; margin: 40px auto 0 auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px #0001; }
+    .account-title { font-size: 2em; color: #1d3557; margin-bottom: 18px; }
+    .account-info { margin-bottom: 24px; }
+    .account-info label { display: block; color: #888; font-size: 0.97em; margin-bottom: 2px; }
+    .account-info input {
+      width: 100%; padding: 7px 10px; margin-bottom: 12px; border-radius: 5px; border: 1px solid #ccc; font-size: 1em;
+      background: #f8f8f8;
+    }
+    .account-actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .account-actions button {
+      padding: 7px 18px; border: none; border-radius: 5px; background: #1d3557; color: #fff; font-size: 1em; cursor: pointer;
+      transition: background 0.18s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .account-actions button:disabled { opacity: 0.7; cursor: not-allowed; }
+    .account-actions button:hover:not(:disabled) { background: #ff3e6c; }
+    .account-logout { background: #e63946; }
+    .account-logout:hover { background: #b71c1c; }
+    .account-delete { background: #888; }
+    .account-delete:hover { background: #222; }
+    .account-msg { color: #43aa8b; margin-bottom: 10px; text-align: center; }
+    .account-error { color: #e63946; margin-bottom: 10px; text-align: center; }
+    .show-password-toggle {
+      display: flex; align-items: center; margin-bottom: 12px; font-size: 0.97em; color: #555; cursor: pointer; user-select: none; gap: 6px;
+    }
+    .show-password-toggle input[type="checkbox"] { margin-right: 6px; }
+    .show-password-toggle i { font-size: 1.1em; color: #888; margin-left: 2px; }
+    .account-meta {
+      font-size: 0.97em;
+      color: #888;
+      margin-bottom: 18px;
+      text-align: right;
+    }
+    @media (max-width: 600px) {
+      .account-container { padding: 10px; }
+      .account-title { font-size: 1.3em; }
+      .account-actions { flex-direction: column; gap: 8px; }
+      .account-meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="account-container">
+    <div class="account-title"><i class="fas fa-user-cog"></i> My Account</div>
+    <div id="accountMsg" class="account-msg" style="display:none;"></div>
+    <div id="accountError" class="account-error" style="display:none;"></div>
+    <form id="accountForm" autocomplete="on">
+      <div class="account-info">
+        <label for="accountName">Name</label>
+        <input type="text" id="accountName" name="accountName" required />
+        <label for="accountEmail">Email</label>
+        <input type="email" id="accountEmail" name="accountEmail" required disabled />
+        <label for="accountPassword">Password <span style="color:#888;font-size:0.9em;">(leave blank to keep unchanged)</span></label>
+        <input type="password" id="accountPassword" name="accountPassword" placeholder="New Password" autocomplete="new-password" />
+        <label class="show-password-toggle">
+          <input type="checkbox" id="showPassword" aria-label="Show password" />
+          Show Password <i class="fa fa-eye" id="eyeIcon"></i>
+        </label>
+      </div>
+      <div class="account-meta" id="accountMeta"></div>
+      <div class="account-actions">
+        <button type="submit"><i class="fas fa-save"></i> Update Profile</button>
+        <button type="button" class="account-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <button type="button" class="account-delete" id="deleteAccountBtn"><i class="fas fa-user-slash"></i> Delete Account</button>
+      </div>
+    </form>
+    <div style="margin-top:30px;">
+      <a href="index.html" style="color:#1d3557;text-decoration:underline;font-size:1.1em;"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
+    </div>
+  </div>
+  <script>
+    // Load user info
+    function getCurrentUser() {
+      return JSON.parse(localStorage.getItem("currentUser") || "{}");
+    }
+    function setCurrentUser(user) {
+      localStorage.setItem("currentUser", JSON.stringify(user));
+    }
+    function updateUserInUsersList(user) {
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      const idx = users.findIndex(u => u.email === user.email);
+      if (idx !== -1) {
+        users[idx] = user;
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+    }
+    function removeUserFromUsersList(email) {
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      users = users.filter(u => u.email !== email);
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+    function showMsg(msg, isError) {
+      document.getElementById("accountMsg").style.display = isError ? "none" : "block";
+      document.getElementById("accountError").style.display = isError ? "block" : "none";
+      document.getElementById("accountMsg").textContent = isError ? "" : msg;
+      document.getElementById("accountError").textContent = isError ? msg : "";
+    }
+    function loadAccount() {
+      const user = getCurrentUser();
+      if (!user || !user.email) {
+        showMsg("You are not logged in. Please login first.", true);
+        document.getElementById("accountForm").style.display = "none";
+        return;
+      }
+      document.getElementById("accountName").value = user.name || "";
+      document.getElementById("accountEmail").value = user.email || "";
+      // Show meta info (joined date, last update)
+      let meta = "";
+      if (user.createdAt) meta += `Joined: ${new Date(user.createdAt).toLocaleDateString()}<br>`;
+      if (user.updatedAt) meta += `Last updated: ${new Date(user.updatedAt).toLocaleString()}`;
+      document.getElementById("accountMeta").innerHTML = meta;
+    }
+    document.getElementById("accountForm").onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById("accountName").value.trim();
+      const password = document.getElementById("accountPassword").value;
+      let user = getCurrentUser();
+      if (!user || !user.email) {
+        showMsg("You are not logged in.", true);
+        return;
+      }
+      if (!name) {
+        showMsg("Name cannot be empty.", true);
+        return;
+      }
+      user.name = name;
+      if (password) user.password = password;
+      user.updatedAt = Date.now();
+      setCurrentUser(user);
+      updateUserInUsersList(user);
+      document.getElementById("accountPassword").value = "";
+      showMsg("Profile updated successfully!", false);
+      loadAccount();
+    };
+    // Show/hide password toggle
+    document.getElementById("showPassword").addEventListener("change", function() {
+      const pwd = document.getElementById("accountPassword");
+      const eye = document.getElementById("eyeIcon");
+      pwd.type = this.checked ? "text" : "password";
+      eye.className = this.checked ? "fa fa-eye-slash" : "fa fa-eye";
+    });
+    // Logout
+    document.getElementById("logoutBtn").onclick = function() {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    };
+    // Delete account
+    document.getElementById("deleteAccountBtn").onclick = function() {
+      if (!confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
+      const user = getCurrentUser();
+      if (user && user.email) {
+        removeUserFromUsersList(user.email);
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("currentUser");
+        showMsg("Your account has been deleted.", false);
+        setTimeout(() => window.location.href = "index.html", 1200);
+      }
+    };
+    loadAccount();
+  </script>
+</body>
+</html>

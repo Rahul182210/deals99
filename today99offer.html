@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Today ₹99 Offers | Deals99</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    .today99-section { margin: 40px auto; max-width: 1100px; }
+    .today99-section h2 { color: #1d3557; margin-bottom: 18px; }
+    .products-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px #0001;
+      padding: 18px 14px 14px 14px;
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.18s, transform 0.13s;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .product-card:hover {
+      box-shadow: 0 8px 28px #ff3e6c22;
+      transform: translateY(-4px) scale(1.04);
+    }
+    .product-card img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #f7f7fa;
+    }
+    .product-info {
+      text-align: center;
+    }
+    .mrp {
+      color: #888;
+      text-decoration: line-through;
+      margin-right: 6px;
+      font-size: 1em;
+    }
+    .discounted {
+      color: #ff3e6c;
+      font-weight: bold;
+      font-size: 1.15em;
+    }
+    .offer-valid {
+      color: #219150;
+      font-size: 0.97em;
+      margin-top: 2px;
+    }
+    .add-to-cart-btn {
+      margin-top: 10px;
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 18px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.18s;
+      box-shadow: 0 1px 4px #0001;
+    }
+    .add-to-cart-btn:hover {
+      background: #219150;
+    }
+    .wishlist-btn {
+      background: #fff;
+      color: #e63946;
+      border: 1px solid #e63946;
+      border-radius: 5px;
+      padding: 6px 12px;
+      margin-top: 6px;
+      font-size: 0.98em;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+    }
+    .wishlist-btn.active, .wishlist-btn:hover {
+      background: #e63946;
+      color: #fff;
+    }
+    .quick-view-btn {
+      background: #457b9d;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      margin-top: 6px;
+      font-size: 0.98em;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .quick-view-btn:hover {
+      background: #1d3557;
+    }
+    .wishlist-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      color: #e63946;
+      font-size: 1.2em;
+      background: #fff;
+      border-radius: 50%;
+      padding: 2px 6px;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .stock-warning {
+      color: #e67e22;
+      font-size: 0.97em;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+    @media (max-width: 700px) {
+      .products-flex { gap: 12px; }
+      .product-card { width: 100%; min-width: 0; }
+      .today99-section { padding: 0 4px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 style="text-align:center;margin:32px 0 18px 0;">Today ₹99 Offers</h1>
+  </header>
+  <main id="today99Main"></main>
+  <div id="quickViewModalBg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0008;"></div>
+  <script>
+    // --- Wishlist utility ---
+    function getWishlist() {
+      return JSON.parse(localStorage.getItem("wishlist")) || [];
+    }
+    function setWishlist(arr) {
+      localStorage.setItem("wishlist", JSON.stringify(arr));
+    }
+
+    // --- Quick View Modal ---
+    function quickViewProduct(productName) {
+      const offers = getValidToday99Offers();
+      const prod = offers.find(p => p.name === productName);
+      if (!prod) return;
+      document.getElementById("quickViewModalBg").innerHTML = `
+        <div class="login-modal-bg" onclick="closeQuickViewModal(event)">
+          <div class="login-modal" style="max-width:400px;" onclick="event.stopPropagation();">
+            <button class="close-btn" onclick="closeQuickViewModal(event);return false;">&times;</button>
+            <h2>${prod.name}</h2>
+            <img src="${Array.isArray(prod.img) ? prod.img[0] : (prod.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${prod.name}" style="width:120px;height:120px;object-fit:contain;margin:10px auto;display:block;">
+            <div style="margin:10px 0;">
+              ${prod.mrp && prod.mrp != prod.discounted ? `<span style="text-decoration:line-through;color:#888;">₹${prod.mrp}</span> ` : ""}
+              <span style="color:#ff3e6c;font-weight:bold;">₹${prod.discounted || 99}</span>
+            </div>
+            <div style="color:#888;font-size:1em;margin-bottom:10px;">${prod.desc || ""}</div>
+            <button class="add-to-cart-btn" onclick="addToCart('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+            <button class="wishlist-btn${getWishlist().includes(prod.name) ? ' active' : ''}" onclick="toggleWishlist('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-heart"></i> Wishlist
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById("quickViewModalBg").style.display = "flex";
+    }
+    function closeQuickViewModal(e) {
+      if (e) e.preventDefault();
+      document.getElementById("quickViewModalBg").style.display = "none";
+      document.getElementById("quickViewModalBg").innerHTML = "";
+    }
+    window.quickViewProduct = quickViewProduct;
+    window.closeQuickViewModal = closeQuickViewModal;
+
+    // --- Wishlist functionality ---
+    function toggleWishlist(productName) {
+      let wishlist = getWishlist();
+      if (wishlist.includes(productName)) {
+        wishlist = wishlist.filter(n => n !== productName);
+      } else {
+        wishlist.push(productName);
+      }
+      setWishlist(wishlist);
+      renderToday99Offers();
+    }
+    window.toggleWishlist = toggleWishlist;
+
+    // --- Get only valid offers (not expired) ---
+    function getValidToday99Offers() {
+      const offers = JSON.parse(localStorage.getItem("today99offers")) || [];
+      const now = new Date();
+      return offers.filter(item => !item.validTill || new Date(item.validTill) > now);
+    }
+
+    // --- Generate HTML for a single product card ---
+    function productCardHtml(item) {
+      const wishlist = getWishlist();
+      return `
+        <div class="product-card">
+          ${wishlist.includes(item.name) ? `<div class="wishlist-badge" title="In Wishlist"><i class="fas fa-heart"></i></div>` : ""}
+          <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" alt="${item.name}" />
+          <div class="product-info">
+            <strong>${item.name}</strong>
+            <div>
+              <span class="mrp">₹${item.mrp || 99}</span>
+              <span class="discounted">₹${item.discounted || 99}</span>
+            </div>
+            ${
+              (typeof item.stock === "number" && item.stock < 5)
+                ? `<div class="stock-warning">Few pieces left!</div>`
+                : ""
+            }
+            <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+            <div class="offer-valid">
+              Offer valid till: ${item.validTill ? new Date(item.validTill).toLocaleString() : "N/A"}
+            </div>
+            <button class="add-to-cart-btn" onclick="addToCart('${item.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+            <button class="wishlist-btn${wishlist.includes(item.name) ? ' active' : ''}" onclick="toggleWishlist('${item.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-heart"></i> Wishlist
+            </button>
+            <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-eye"></i> Quick View
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- Add product to cart ---
+    function addToCart(productName) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(productName);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`🛒 "${productName}" added to cart!`);
+      if (typeof updateCartIcon === "function") updateCartIcon();
+      if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+    }
+    window.addToCart = addToCart;
+
+    // --- Render all Today99 offers ---
+    function renderToday99Offers() {
+      const offers = getValidToday99Offers();
+      const main = document.getElementById("today99Main");
+      main.innerHTML = `
+        <section class="today99-section">
+          <h2>Available Today</h2>
+          <div class="products-flex">
+            ${
+              offers.length
+                ? offers.map(item => productCardHtml(item)).join("")
+                : `<div style="color:#aaa;font-size:1.05em;">No Today ₹99 offers available.</div>`
+            }
+          </div>
+        </section>
+      `;
+    }
+
+    document.addEventListener("DOMContentLoaded", renderToday99Offers);
+  </script>
+</body>
+</html>

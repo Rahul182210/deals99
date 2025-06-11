@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up | Deals99</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .auth-container {
+      max-width: 400px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 2rem 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 16px #0001;
+    }
+    .auth-container h2 {
+      margin-bottom: 1.5rem;
+      color: #e91e63;
+      text-align: center;
+    }
+    .auth-container input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border 0.18s;
+    }
+    .auth-container input:focus {
+      border: 1.5px solid #e91e63;
+      outline: none;
+      background: #fff0fa;
+    }
+    .auth-container button {
+      width: 100%;
+      padding: 0.7rem;
+      background: #e91e63;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: background 0.2s;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .auth-container button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .auth-container button:hover:not(:disabled) {
+      background: #c2185b;
+    }
+    .auth-container .switch-link {
+      text-align: center;
+      display: block;
+      color: #e91e63;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.98rem;
+      margin-bottom: 0.5rem;
+      transition: color 0.18s;
+    }
+    .auth-container .switch-link:hover {
+      color: #1d3557;
+      text-decoration: underline;
+    }
+    .auth-error {
+      color: #e74c3c;
+      margin-bottom: 1rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+    .auth-success {
+      color: #27ae60;
+      margin-bottom: 1rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+    .show-password-toggle {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      color: #555;
+      cursor: pointer;
+      user-select: none;
+      gap: 6px;
+    }
+    .show-password-toggle input[type="checkbox"] {
+      margin-right: 6px;
+    }
+    .show-password-toggle i {
+      font-size: 1.1em;
+      color: #888;
+      margin-left: 2px;
+      transition: color 0.18s;
+    }
+    .show-password-toggle input[type="checkbox"]:checked + i {
+      color: #e91e63;
+    }
+    .social-login {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .social-login button {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      border-radius: 5px;
+      padding: 0.7rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .social-login button:hover {
+      background: #e0e0e0;
+    }
+    .social-login .fa-google { color: #ea4335; }
+    .social-login .fa-facebook { color: #1877f3; }
+    #passwordStrength {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      color: #888;
+      text-align: center;
+      min-height: 18px;
+    }
+    @media (max-width: 500px) {
+      .auth-container { padding: 1.2rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <h2>Create Your Account</h2>
+    <div id="signupError" class="auth-error"></div>
+    <label for="signupName" style="display:none;">Full Name</label>
+    <input type="text" id="signupName" placeholder="Full Name" autocomplete="name" required />
+    <label for="signupEmail" style="display:none;">Email</label>
+    <input type="email" id="signupEmail" placeholder="Email" autocomplete="email" required />
+    <label for="signupPassword" style="display:none;">Password</label>
+    <input type="password" id="signupPassword" placeholder="Password" autocomplete="new-password" required />
+    <label class="show-password-toggle">
+      <input type="checkbox" id="showPassword" /> Show Password <i class="fa fa-eye" id="eyeIcon"></i>
+    </label>
+    <div id="passwordStrength"></div>
+    <button id="signupBtn"><i class="fas fa-user-plus"></i> Sign Up</button>
+    <div class="social-login">
+      <button type="button" onclick="alert('Google sign up is a demo!')">
+        <i class="fab fa-google"></i> Sign up with Google
+      </button>
+      <button type="button" onclick="alert('Facebook sign up is a demo!')">
+        <i class="fab fa-facebook"></i> Sign up with Facebook
+      </button>
+    </div>
+    <span class="switch-link" onclick="window.location.href='login.html'">Already have an account? Login</span>
+    <span class="switch-link" onclick="alert('Please contact support@deals99.in to reset your password.')">Forgot password?</span>
+  </div>
+  <script>
+    // Show/hide password toggle with icon
+    document.getElementById("showPassword").addEventListener("change", function() {
+      const pwd = document.getElementById("signupPassword");
+      const eye = document.getElementById("eyeIcon");
+      pwd.type = this.checked ? "text" : "password";
+      eye.className = this.checked ? "fa fa-eye-slash" : "fa fa-eye";
+      eye.style.color = this.checked ? "#e91e63" : "#888";
+    });
+
+    // Password strength indicator
+    document.getElementById("signupPassword").addEventListener("input", function() {
+      const val = this.value;
+      const strengthDiv = document.getElementById("passwordStrength");
+      if (!val) {
+        strengthDiv.textContent = "";
+        strengthDiv.style.color = "#888";
+      } else if (val.length < 6) {
+        strengthDiv.textContent = "Password too short (min 6 chars)";
+        strengthDiv.style.color = "#e67e22";
+      } else if (!/[A-Z]/.test(val) || !/[0-9]/.test(val)) {
+        strengthDiv.textContent = "Add a number and uppercase letter for a stronger password";
+        strengthDiv.style.color = "#e67e22";
+      } else {
+        strengthDiv.textContent = "Strong password!";
+        strengthDiv.style.color = "#27ae60";
+      }
+    });
+
+    // Autofocus name field
+    document.getElementById("signupName").focus();
+
+    // Allow pressing Enter to submit
+    document.querySelectorAll("#signupName, #signupEmail, #signupPassword").forEach(input => {
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") document.getElementById("signupBtn").click();
+      });
+    });
+
+    // Show loading spinner on signup
+    function setLoading(isLoading) {
+      const btn = document.getElementById("signupBtn");
+      if (isLoading) {
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Signing up...`;
+        btn.disabled = true;
+      } else {
+        btn.innerHTML = `<i class="fas fa-user-plus"></i> Sign Up`;
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById("signupBtn").onclick = function() {
+      const name = document.getElementById("signupName").value.trim();
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+      const errorDiv = document.getElementById("signupError");
+      errorDiv.textContent = "";
+      errorDiv.className = "auth-error";
+      setLoading(true);
+
+      // Improved email validation
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!name || !email || !password) {
+        errorDiv.textContent = "Please fill all fields.";
+        setLoading(false);
+        return;
+      }
+      if (!emailPattern.test(email)) {
+        errorDiv.textContent = "Please enter a valid email address.";
+        setLoading(false);
+        return;
+      }
+      if (password.length < 6 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        errorDiv.textContent = "Password must be at least 6 characters, include a number and an uppercase letter.";
+        setLoading(false);
+        return;
+      }
+      // Check if user already exists
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      if (users.find(u => u.email === email)) {
+        errorDiv.textContent = "Email already registered. Please login or use 'Forgot password'.";
+        setLoading(false);
+        return;
+      }
+      users.push({ name, email, password });
+      localStorage.setItem("users", JSON.stringify(users));
+      errorDiv.className = "auth-success";
+      errorDiv.textContent = "Sign up successful! Redirecting to login...";
+      setTimeout(() => window.location.href = "login.html", 1200);
+      setLoading(false);
+    };
+
+    // Optional: Redirect to homepage if already logged in
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

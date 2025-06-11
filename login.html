@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Deals99</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .auth-container {
+      max-width: 400px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 2rem 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 16px #0001;
+    }
+    .auth-container h2 {
+      margin-bottom: 1.5rem;
+      color: #e91e63;
+      text-align: center;
+    }
+    .auth-container input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border 0.18s;
+    }
+    .auth-container input:focus {
+      border: 1.5px solid #e91e63;
+      outline: none;
+      background: #fff0fa;
+    }
+    .auth-container button {
+      width: 100%;
+      padding: 0.7rem;
+      background: #e91e63;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: background 0.2s;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .auth-container button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .auth-container button:hover:not(:disabled) {
+      background: #c2185b;
+    }
+    .auth-container .switch-link {
+      text-align: center;
+      display: block;
+      color: #e91e63;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.98rem;
+      margin-bottom: 0.5rem;
+      transition: color 0.18s;
+    }
+    .auth-container .switch-link:hover {
+      color: #1d3557;
+      text-decoration: underline;
+    }
+    .auth-error {
+      color: #e74c3c;
+      margin-bottom: 1rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+    .auth-success {
+      color: #27ae60;
+      margin-bottom: 1rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+    .show-password-toggle {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      color: #555;
+      cursor: pointer;
+      user-select: none;
+      gap: 6px;
+    }
+    .show-password-toggle input[type="checkbox"] {
+      margin-right: 6px;
+    }
+    .show-password-toggle i {
+      font-size: 1.1em;
+      color: #888;
+      margin-left: 2px;
+      transition: color 0.18s;
+    }
+    .show-password-toggle input[type="checkbox"]:checked + i {
+      color: #e91e63;
+    }
+    .forgot-link {
+      display: block;
+      text-align: right;
+      color: #888;
+      font-size: 0.96rem;
+      margin-bottom: 1rem;
+      text-decoration: underline;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: #e91e63; }
+    .social-login {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .social-login button {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      border-radius: 5px;
+      padding: 0.7rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .social-login button:hover {
+      background: #e0e0e0;
+    }
+    .social-login .fa-google { color: #ea4335; }
+    .social-login .fa-facebook { color: #1877f3; }
+    .divider {
+      text-align: center;
+      color: #bbb;
+      margin: 1.2rem 0 1rem 0;
+      position: relative;
+    }
+    .divider:before, .divider:after {
+      content: "";
+      display: inline-block;
+      width: 40%;
+      height: 1px;
+      background: #eee;
+      vertical-align: middle;
+      margin: 0 8px;
+    }
+    @media (max-width: 500px) {
+      .auth-container { padding: 1.2rem 0.5rem; }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <div class="auth-container">
+    <h2>Login to Deals99</h2>
+    <div id="loginError" class="auth-error" aria-live="polite"></div>
+    <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" required />
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required />
+    <label class="show-password-toggle">
+      <input type="checkbox" id="showPassword" aria-label="Show password" />
+      Show Password <i class="fa fa-eye" id="eyeIcon"></i>
+    </label>
+    <span class="forgot-link" tabindex="0" onclick="forgotPassword()">Forgot password?</span>
+    <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+    <div class="divider">or</div>
+    <div class="social-login">
+      <button type="button" onclick="alert('Google login is a demo!')">
+        <i class="fab fa-google"></i> Login with Google
+      </button>
+      <button type="button" onclick="alert('Facebook login is a demo!')">
+        <i class="fab fa-facebook"></i> Login with Facebook
+      </button>
+    </div>
+    <span class="switch-link" onclick="window.location.href='signup.html'">Don't have an account? Sign Up</span>
+    <span class="switch-link" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Home</span>
+  </div>
+  <script>
+    // Show/hide password toggle with icon
+    document.getElementById("showPassword").addEventListener("change", function() {
+      const pwd = document.getElementById("loginPassword");
+      const eye = document.getElementById("eyeIcon");
+      pwd.type = this.checked ? "text" : "password";
+      eye.className = this.checked ? "fa fa-eye-slash" : "fa fa-eye";
+      eye.style.color = this.checked ? "#e91e63" : "#888";
+    });
+
+    // Autofocus email field
+    document.getElementById("loginEmail").focus();
+
+    // Allow pressing Enter to submit
+    document.querySelectorAll("#loginEmail, #loginPassword").forEach(input => {
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") document.getElementById("loginBtn").click();
+      });
+    });
+
+    // Forgot password handler
+    function forgotPassword() {
+      const email = document.getElementById("loginEmail").value.trim();
+      if (!email) {
+        alert("Please enter your email to reset your password.");
+        document.getElementById("loginEmail").focus();
+        return;
+      }
+      // Demo: just show a message
+      alert("A password reset link (demo) would be sent to: " + email);
+    }
+
+    // Show loading spinner on login
+    function setLoading(isLoading) {
+      const btn = document.getElementById("loginBtn");
+      if (isLoading) {
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Logging in...`;
+        btn.disabled = true;
+      } else {
+        btn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Login`;
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById("loginBtn").onclick = function() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      const errorDiv = document.getElementById("loginError");
+      errorDiv.textContent = "";
+      errorDiv.className = "auth-error";
+      setLoading(true);
+      setTimeout(() => { // Simulate async
+        if (!email || !password) {
+          errorDiv.textContent = "Please enter both email and password.";
+          setLoading(false);
+          return;
+        }
+        // Simulate user check from localStorage
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const user = users.find(u => u.email === email && u.password === password);
+        if (user) {
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("currentUser", JSON.stringify(user));
+          errorDiv.className = "auth-success";
+          errorDiv.textContent = "Login successful! Redirecting...";
+          setTimeout(() => window.location.href = "index.html", 900);
+        } else if (email === "admin@deals99.in" && password === "Admin@123") {
+          // Allow admin login from here
+          localStorage.setItem("isAdminLoggedIn", "true");
+          errorDiv.className = "auth-success";
+          errorDiv.textContent = "Admin login successful! Redirecting...";
+          setTimeout(() => window.location.href = "admin.html", 900);
+        } else {
+          errorDiv.className = "auth-error";
+          errorDiv.textContent = "Invalid email or password.";
+          setLoading(false);
+        }
+      }, 400);
+    };
+
+    // Optional: Redirect to homepage if already logged in
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      window.location.href = "index.html";
+    }
+    if (localStorage.getItem("isAdminLoggedIn") === "true") {
+      window.location.href = "admin.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deals99 | Online Shopping for Everyone</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --primary: #1d3557;
+      --accent: #ff3e6c;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --card: #fff;
+      --shadow: 0 4px 24px #0001;
+      --radius: 12px;
+    }
+    body {
+      background: var(--bg);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      color: #222;
+    }
+    .header {
+      background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
+      color: #fff;
+      padding: 0 0 8px 0; /* less padding for compactness */
+      border-radius: 0 0 var(--radius) var(--radius);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 18px 0 18px; /* less padding for compactness */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo h1 {
+      margin: 0;
+      font-size: 1.3em; /* smaller logo font */
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 8px #0002;
+    }
+    .nav {
+      display: flex;
+      gap: 10px; /* less gap */
+    }
+    .nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.98em; /* smaller font */
+      padding: 4px 8px;
+      border-radius: 5px;
+      transition: background 0.18s, color 0.18s;
+    }
+    .nav a:hover, .nav a.active {
+      background: #fff2;
+      color: var(--accent);
+    }
+    .icons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.1em;
+    }
+    .wishlist-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.1em;
+      border-radius: 50%;
+      padding: 4px;
+      transition: background 0.18s;
+      position: relative;
+    }
+    .wishlist-btn:hover {
+      background: #fff2;
+      color: var(--accent);
+    }
+    .wishlist-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75em;
+      border-radius: 50%;
+      padding: 1px 5px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .profile-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .profile-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.3em;
+      cursor: pointer;
+      border-radius: 50%;
+      padding: 6px;
+      transition: background 0.18s;
+    }
+    .profile-btn:hover {
+      background: #fff2;
+    }
+    .profile-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 36px;
+      background: #fff;
+      color: #222;
+      min-width: 180px;
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      z-index: 1000;
+      padding: 10px 0;
+      font-size: 1em;
+    }
+    .profile-dropdown.open .profile-menu {
+      display: block;
+    }
+    .profile-menu a, .profile-menu button {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: #222;
+      text-align: left;
+      padding: 10px 18px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.18s;
+      text-decoration: none;
+    }
+    .profile-menu a:hover, .profile-menu button:hover {
+      background: #f2f2f2;
+      color: var(--accent);
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 18px auto 0 auto;
+      max-width: 480px;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px #0001;
+      padding: 6px 12px;
+    }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      padding: 0.7rem;
+      border-radius: 6px;
+      background: none;
+    }
+    .search-bar button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      padding: 0.7rem 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.18s;
+    }
+    .search-bar button:hover {
+      background: var(--secondary);
+    }
+    .hero {
+      background: linear-gradient(90deg, #fff 60%, #ffe5ef 100%);
+      padding: 48px 0 32px 0;
+      text-align: center;
+      border-radius: 0 0 var(--radius) var(--radius);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    .hero-content h2 {
+      font-size: 2.3em;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .hero-content p {
+      font-size: 1.2em;
+      color: #555;
+      margin-bottom: 18px;
+    }
+    .hero-content .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 28px;
+      font-size: 1.1em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s;
+      text-decoration: none;
+      box-shadow: 0 2px 8px #ff3e6c22;
+    }
+    .hero-content .btn:hover {
+      background: var(--secondary);
+      color: #fff;
+    }
+    .section-title {
+      color: var(--primary);
+      margin-bottom: 18px;
+      font-size: 1.5em;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .products-flex, .deals-grid, .offers-grid, .electronics-grid, .keychain-grid, .category-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: flex-start;
+    }
+    .product-card, .deal-card, .gift-card, .electronic-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      text-align: center;
+      width: 190px;
+      transition: box-shadow 0.2s, transform 0.18s;
+      position: relative;
+    }
+    .product-card:hover, .deal-card:hover, .gift-card:hover, .electronic-card:hover {
+      box-shadow: 0 8px 32px #ff3e6c22;
+      transform: translateY(-4px) scale(1.03);
+      z-index: 2;
+    }
+    .product-card img, .deal-card img, .gift-card img, .electronic-card img {
+      width: 100px; height: 100px; object-fit: contain; margin-bottom: 8px;
+      border-radius: 8px;
+      background: #f8f8f8;
+    }
+    .mrp {
+      text-decoration: line-through;
+      color: #888;
+      margin-right: 4px;
+    }
+    .discounted, .price-tag {
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    .add-to-cart-btn, .buy-now {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.97em;
+      transition: background 0.2s;
+      margin-right: 6px;
+    }
+    .add-to-cart-btn:hover, .buy-now:hover {
+      background: var(--accent);
+    }
+    .special-offer-block {
+      background: #fffbe6;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px #ffe08233;
+    }
+    .special-offer-title {
+      color: var(--secondary);
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 6px;
+    }
+    /* Footer */
+    .footer-section {
+      background: var(--primary);
+      color: #fff;
+      padding: 32px 0 0 0;
+      margin-top: 40px;
+      border-top: 1px solid #eee;
+      border-radius: var(--radius) var(--radius) 0 0;
+      box-shadow: 0 -2px 8px #0001;
+    }
+    .footer-content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .footer-col {
+      flex: 1 1 200px;
+      min-width: 180px;
+      margin-bottom: 18px;
+    }
+    .footer-col h3 {
+      color: #fff;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+      letter-spacing: 0.5px;
+    }
+    .footer-col a {
+      color: #ffe082;
+      text-decoration: none;
+      transition: color 0.18s;
+      font-size: 1em;
+    }
+    .footer-col a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    .footer-social {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+    }
+    .footer-social a {
+      color: #ffe082;
+      font-size: 1.3em;
+      transition: color 0.18s;
+    }
+    .footer-social a:hover {
+      color: #fff;
+    }
+    .footer-newsletter input[type="email"] {
+      width: 70%;
+      padding: 7px;
+      border-radius: 5px 0 0 5px;
+      border: none;
+      outline: none;
+      font-size: 1em;
+    }
+    .footer-newsletter button {
+      padding: 7px 16px;
+      border-radius: 0 5px 5px 0;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .footer-newsletter button:hover {
+      background: var(--secondary);
+    }
+    .footer-bottom {
+      text-align: center;
+      margin-top: 12px;
+      color: #ffe082;
+      font-size: 0.98em;
+      padding-bottom: 12px;
+    }
+    @media (max-width: 900px) {
+      .container, .footer-content { flex-direction: column; align-items: flex-start; }
+      .nav { flex-wrap: wrap; gap: 10px; }
+      .footer-content { gap: 18px; }
+    }
+    @media (max-width: 600px) {
+      .container, .footer-content { padding: 12px; }
+      .products-flex, .deals-grid, .offers-grid, .electronics-grid, .keychain-grid, .category-grid { gap: 10px; }
+      .product-card, .deal-card, .gift-card, .electronic-card { width: 100%; min-width: 0; }
+      .footer-col { min-width: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="logo"><h1>Deals99</h1></div>
+      <nav class="nav">
+        <a href="#home" onclick="event.preventDefault(); scrollToSection('home')">Home</a>
+        <a href="#categories" onclick="event.preventDefault(); scrollToSection('categories')">Categories</a>
+        <a href="#electronics" onclick="event.preventDefault(); scrollToSection('electronics')">Electronics</a>
+        <a href="#keychains" onclick="event.preventDefault(); scrollToSection('keychains')">Keychains</a>
+        <a href="#today99" onclick="event.preventDefault(); scrollToSection('today99')">Today ₹99</a>
+        <a href="#specialOffers" onclick="event.preventDefault(); scrollToSection('specialOffers')">Offers</a>
+        <a href="#newarrivals" onclick="event.preventDefault(); scrollToSection('newarrivals')">New Arrivals</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+      <div class="icons">
+        <span style="position:relative;cursor:pointer;" onclick="window.location.href='cart.html'">
+          <i class="fas fa-shopping-cart"></i>
+        </span>
+        <button class="wishlist-btn" id="wishlistBtn" title="Wishlist">
+          <i class="fas fa-heart"></i>
+          <span class="wishlist-count" id="wishlistCount">0</span>
+        </button>
+        <span class="profile-dropdown" id="profileDropdown">
+          <button class="profile-btn" id="profileIconBtn"><i class="fas fa-user"></i></button>
+          <div class="profile-menu" id="profileMenu">
+            <div id="profileMenuGreeting" style="padding:10px 18px;color:#1d3557;font-weight:500;"></div>
+            <a href="orders.html"><i class="fas fa-box"></i> My Orders</a>
+            <a href="account.html"><i class="fas fa-user-cog"></i> Account</a>
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </span>
+      </div>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search New Arrivals..."/>
+      <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <h2>Welcome to Deals99</h2>
+      <p>Shop deals from ₹99! Discover top offers, new arrivals, and exclusive categories every day.</p>
+      <a href="#today99" class="btn">Shop Now</a>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section id="categories" class="categories">
+    <h2 class="section-title"><i class="fas fa-th-large"></i> Categories</h2>
+    <div class="category-grid">
+      <!-- Fashion -->
+      <div class="category-card">
+        <i class="fas fa-tshirt"></i>
+        <h3>Fashion</h3>
+        <p>Clothing, Accessories</p>
+        <div class="subcategories">
+          <a href="subcategory.html?subcat=All&cat=Fashion" onclick="event.stopPropagation();">All</a>
+          <a href="subcategory.html?subcat=Men's%20T-Shirts&cat=Fashion" onclick="event.stopPropagation();">Men's T-Shirts</a>
+          <a href="subcategory.html?subcat=Women's%20Dresses&cat=Fashion" onclick="event.stopPropagation();">Women's Dresses</a>
+          <a href="subcategory.html?subcat=Kids%20Wear&cat=Fashion" onclick="event.stopPropagation();">Kids Wear</a>
+          <a href="subcategory.html?subcat=Accessories&cat=Fashion" onclick="event.stopPropagation();">Accessories</a>
+          <a href="subcategory.html?subcat=Ethnic%20Wear&cat=Fashion" onclick="event.stopPropagation();">Ethnic Wear</a>
+          <a href="subcategory.html?subcat=Footwear&cat=Fashion" onclick="event.stopPropagation();">Footwear</a>
+          <a href="subcategory.html?subcat=Bags%20%26%20Wallets&cat=Fashion" onclick="event.stopPropagation();">Bags & Wallets</a>
+        </div>
+      </div>
+      <!-- Electronics -->
+      <div class="category-card">
+        <i class="fas fa-laptop"></i>
+        <h3>Electronics</h3>
+        <p>Mobiles, Gadgets</p>
+        <div class="subcategories">
+          <a href="subcategory.html?subcat=All&cat=Electronics" onclick="event.stopPropagation();">All</a>
+          <a href="subcategory.html?subcat=Mobiles&cat=Electronics" onclick="event.stopPropagation();">Mobiles</a>
+          <a href="subcategory.html?subcat=Laptops&cat=Electronics" onclick="event.stopPropagation();">Laptops</a>
+          <a href="subcategory.html?subcat=Earphones&cat=Electronics" onclick="event.stopPropagation();">Earphones</a>
+          <a href="subcategory.html?subcat=Smart%20Watches&cat=Electronics" onclick="event.stopPropagation();">Smart Watches</a>
+          <a href="subcategory.html?subcat=Tablets&cat=Electronics" onclick="event.stopPropagation();">Tablets</a>
+          <a href="subcategory.html?subcat=Power%20Banks&cat=Electronics" onclick="event.stopPropagation();">Power Banks</a>
+          <a href="subcategory.html?subcat=Speakers&cat=Electronics" onclick="event.stopPropagation();">Speakers</a>
+        </div>
+      </div>
+      <!-- Keychains -->
+      <div class="category-card">
+        <i class="fas fa-key"></i>
+        <h3>Keychains</h3>
+        <p>Customized, Cool</p>
+        <div class="subcategories">
+          <a href="subcategory.html?subcat=All&cat=Keychains" onclick="event.stopPropagation();">All</a>
+          <a href="subcategory.html?subcat=Superhero%20Keychains&cat=Keychains" onclick="event.stopPropagation();">Superhero Keychains</a>
+          <a href="subcategory.html?subcat=Name%20Keychains&cat=Keychains" onclick="event.stopPropagation();">Name Keychains</a>
+          <a href="subcategory.html?subcat=Photo%20Keychains&cat=Keychains" onclick="event.stopPropagation();">Photo Keychains</a>
+          <a href="subcategory.html?subcat=Metal%20Keychains&cat=Keychains" onclick="event.stopPropagation();">Metal Keychains</a>
+          <a href="subcategory.html?subcat=Wooden%20Keychains&cat=Keychains" onclick="event.stopPropagation();">Wooden Keychains</a>
+          <a href="subcategory.html?subcat=Cartoon%20Keychains&cat=Keychains" onclick="event.stopPropagation();">Cartoon Keychains</a>
+        </div>
+      </div>
+      <!-- Gifts -->
+      <div class="category-card">
+        <i class="fas fa-gift"></i>
+        <h3>Gifts</h3>
+        <p>Surprise Gifts</p>
+        <div class="subcategories">
+          <a href="subcategory.html?subcat=All&cat=Gifts" onclick="event.stopPropagation();">All</a>
+          <a href="subcategory.html?subcat=Birthday%20Gifts&cat=Gifts" onclick="event.stopPropagation();">Birthday Gifts</a>
+          <a href="subcategory.html?subcat=Anniversary%20Gifts&cat=Gifts" onclick="event.stopPropagation();">Anniversary Gifts</a>
+          <a href="subcategory.html?subcat=Personalized%20Gifts&cat=Gifts" onclick="event.stopPropagation();">Personalized Gifts</a>
+          <a href="subcategory.html?subcat=Gift%20Hampers&cat=Gifts" onclick="event.stopPropagation();">Gift Hampers</a>
+          <a href="subcategory.html?subcat=Greeting%20Cards&cat=Gifts" onclick="event.stopPropagation();">Greeting Cards</a>
+          <a href="subcategory.html?subcat=Flowers&cat=Gifts" onclick="event.stopPropagation();">Flowers</a>
+        </div>
+      </div>
+      <!-- Other -->
+      <div class="category-card">
+        <i class="fas fa-star"></i>
+        <h3>Other</h3>
+        <p>More Deals</p>
+        <div class="subcategories">
+          <a href="subcategory.html?subcat=All&cat=Other" onclick="event.stopPropagation();">All</a>
+          <a href="subcategory.html?subcat=Home%20Decor&cat=Other" onclick="event.stopPropagation();">Home Decor</a>
+          <a href="subcategory.html?subcat=Stationery&cat=Other" onclick="event.stopPropagation();">Stationery</a>
+          <a href="subcategory.html?subcat=Toys&cat=Other" onclick="event.stopPropagation();">Toys</a>
+          <a href="subcategory.html?subcat=Kitchenware&cat=Other" onclick="event.stopPropagation();">Kitchenware</a>
+          <a href="subcategory.html?subcat=Fitness&cat=Other" onclick="event.stopPropagation();">Fitness</a>
+          <a href="subcategory.html?subcat=Other&cat=Other" onclick="event.stopPropagation();">Other</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Electronics Section -->
+  <section id="electronics" class="electronics-section">
+    <h2 class="section-title"><i class="fas fa-bolt"></i> Top Electronics</h2>
+    <div class="electronics-grid">
+      <div class="electronic-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/1063/1063333.png" alt="Headphones"/>
+        <h3>Headphones</h3>
+        <p>₹799</p>
+        <button class="add-to-cart-btn">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+      <div class="electronic-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920122.png" alt="Laptops"/>
+        <h3>Laptops</h3>
+        <p>₹29999</p>
+        <button class="add-to-cart-btn">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Keychains & Gifts Section -->
+  <section id="keychains" class="keychains-section">
+    <h2 class="section-title"><i class="fas fa-key"></i> Keychains & Gifts</h2>
+    <div class="keychain-grid">
+      <div class="gift-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/3700/3700833.png" alt="Photo Keychains"/>
+        <h3>Photo Keychains</h3>
+        <p>₹99</p>
+        <button class="add-to-cart-btn">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- New Arrivals Section -->
+  <section id="newarrivals" class="new-arrivals-section">
+    <h2 class="section-title"><i class="fas fa-star"></i> New Arrivals</h2>
+    <div id="publicNewArrivals">
+      <!-- New arrivals will be dynamically loaded here -->
+    </div>
+  </section>
+
+  <!-- Today ₹99 Deals Section -->
+  <section id="today99" class="todays-deals-section">
+    <h2 class="section-title"><i class="fas fa-fire"></i> Today ₹99 Deals</h2>
+    <div class="deals-grid" id="today99Grid">
+      <!-- ₹99 deals will be dynamically loaded here -->
+    </div>
+  </section>
+
+  <!-- Special Offers Section -->
+  <section id="specialOffers" class="special-offers-section">
+    <h2 class="section-title"><i class="fas fa-bolt"></i> Special Offers</h2>
+    <div class="offers-grid" id="specialOffersGrid">
+      <!-- Special offers will be dynamically loaded here -->
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="footer-section">
+    <div class="footer-content">
+      <div class="footer-col">
+        <h3>Deals99</h3>
+        <p>Shop deals from ₹99. Discover top offers, new arrivals, and exclusive categories every day.</p>
+        <div class="footer-social">
+          <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://twitter.com" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="mailto:support@deals99.in" title="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h3>Quick Links</h3>
+        <a href="#home" onclick="scrollToSection('home')">Home</a><br>
+        <a href="#categories" onclick="scrollToSection('categories')">Categories</a><br>
+        <a href="#today99" onclick="scrollToSection('today99')">Today ₹99 Deals</a><br>
+        <a href="#specialOffers" onclick="scrollToSection('specialOffers')">Special Offers</a><br>
+        <a href="#newarrivals" onclick="scrollToSection('newarrivals')">New Arrivals</a><br>
+        <a href="admin.html">Admin Panel</a>
+      </div>
+      <div class="footer-col">
+        <h3>Contact</h3>
+        <p>Email: <a href="mailto:support@deals99.in">support@deals99.in</a></p>
+        <p>Phone: <a href="tel:+919999999999">+91 99999 99999</a></p>
+        <p>Address: Mumbai, India</p>
+      </div>
+      <div class="footer-col footer-newsletter">
+        <h3>Newsletter</h3>
+        <form id="newsletterForm">
+          <input type="email" id="newsletterEmail" placeholder="Your email" required />
+          <button type="submit">Subscribe</button>
+        </form>
+        <div id="newsletterMsg" style="margin-top:7px;font-size:0.97em;"></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2025 Deals99. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- Login Modal (hidden by default) -->
+  <div id="loginModalBg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0008;"></div>
+
+  <script>
+  // --- Utility: Get from localStorage ---
+  function getLS(key) {
+    return JSON.parse(localStorage.getItem(key)) || [];
+  }
+  function setLS(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  // --- Enhanced: Recent Searches ---
+  function saveRecentSearch(query) {
+    if (!query) return;
+    let recent = getLS("recentSearches");
+    recent = recent.filter(q => q !== query);
+    recent.unshift(query);
+    if (recent.length > 8) recent = recent.slice(0, 8);
+    setLS("recentSearches", recent);
+  }
+  function showRecentSearches() {
+    const suggestionBoxId = "searchSuggestionBox";
+    let suggestionBox = document.getElementById(suggestionBoxId);
+    if (!suggestionBox) return;
+    const recent = getLS("recentSearches");
+    if (!recent.length) return;
+    suggestionBox.innerHTML += `
+      <div style="padding:8px 10px 4px 10px;color:#888;font-size:0.97em;border-top:1px solid #f2f2f2;">
+        <b>Recent:</b> ${recent.map(q =>
+          `<span style="cursor:pointer;color:#1d3557;margin-right:8px;" onclick="document.getElementById('searchInput').value='${q.replace(/'/g,"\\'")}';searchNewArrivals('${q.toLowerCase()}');document.getElementById('searchSuggestionBox').style.display='none';">${q}</span>`
+        ).join("")}
+        <span style="float:right;cursor:pointer;color:#e63946;" onclick="clearRecentSearches()" title="Clear recent">&times;</span>
+      </div>
+    `;
+  }
+  function clearRecentSearches() {
+    setLS("recentSearches", []);
+    document.getElementById("searchSuggestionBox")?.remove();
+  }
+  window.clearRecentSearches = clearRecentSearches;
+
+  // --- Search Bar Functionality for New Arrivals ---
+  function searchNewArrivals(query) {
+    saveRecentSearch(query);
+    const liveProducts = getLS("liveProducts");
+    const filtered = liveProducts.filter(item =>
+      item.name.toLowerCase().includes(query) ||
+      (item.desc && item.desc.toLowerCase().includes(query))
+    );
+    const container = document.getElementById("publicNewArrivals");
+    if (!container) return;
+    if (!query) {
+      renderPublicNewArrivals();
+      return;
+    }
+    if (!filtered.length) {
+      container.innerHTML = `<div style="color:#888;text-align:center;">No products found for "<b>${query}</b>".</div>`;
+      return;
+    }
+    // Group filtered results by category
+    const grouped = {};
+    filtered.forEach(item => {
+      const cat = item.category || "Other";
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(item);
+    });
+    container.innerHTML = "";
+    Object.keys(grouped).forEach(cat => {
+      const items = grouped[cat];
+      const section = document.createElement("div");
+      section.className = "category-product-section";
+      section.innerHTML = `
+        <h3 style="margin:18px 0 10px 0;color:#1d3557;">${cat}</h3>
+        <div class="products-flex">
+          ${items.map(item => {
+            const wishlist = getLS("wishlist");
+            const inWishlist = wishlist.includes(item.name);
+            return `
+            <div class="product-card">
+              ${inWishlist ? `<div class="wishlist-badge" title="In Wishlist" style="position:absolute;top:10px;right:12px;color:#e63946;font-size:1.2em;background:#fff;border-radius:50%;padding:2px 6px;box-shadow:0 2px 8px #0001;"><i class="fas fa-heart"></i></div>` : ""}
+              <img src="${Array.isArray(item.img) ? item.img[0] : (item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${item.name}" />
+              <div class="product-info">
+                <strong>${item.name}</strong>
+                <div>
+                  ${item.mrp && item.mrp != item.price ? `<span class="mrp">₹${item.mrp}</span> ` : ""}
+                  <span class="discounted">₹${item.price}</span>
+                </div>
+                ${
+                  (typeof item.stock === "number" && item.stock < 5)
+                    ? `<div style="color:#e67e22;font-size:0.97em;font-weight:500;">Few pieces left!</div>`
+                    : ""
+                }
+                <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+                <button class="add-to-cart-btn" onclick="addToCart('${item.name}')">
+                  <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+                <button class="buy-now" onclick="buyNow('${item.name}')">Buy Now</button>
+                <button class="add-to-wishlist-btn${inWishlist ? ' active' : ''}" onclick="toggleWishlist('${item.name}')">
+                  <i class="fas fa-heart"></i> Wishlist
+                </button>
+                <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+                  <i class="fas fa-eye"></i> Quick View
+                </button>
+                <button class="share-btn" onclick="shareProduct('${item.name.replace(/'/g,"\\'")}')">
+                  <i class="fas fa-share-alt"></i> Share
+                </button>
+              </div>
+            </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+      container.appendChild(section);
+    });
+    enhanceProductCardsWithQuickView();
+  }
+
+  // --- Enhanced Search Bar: Live Suggestions + Recent ---
+  function showSearchSuggestions(query) {
+    const suggestionBoxId = "searchSuggestionBox";
+    let suggestionBox = document.getElementById(suggestionBoxId);
+    if (!suggestionBox) {
+      suggestionBox = document.createElement("div");
+      suggestionBox.id = suggestionBoxId;
+      suggestionBox.style.position = "absolute";
+      suggestionBox.style.background = "#fff";
+      suggestionBox.style.boxShadow = "0 2px 8px #0002";
+      suggestionBox.style.borderRadius = "8px";
+      suggestionBox.style.zIndex = "1001";
+      suggestionBox.style.width = "100%";
+      suggestionBox.style.maxHeight = "220px";
+      suggestionBox.style.overflowY = "auto";
+      suggestionBox.style.top = "44px";
+      suggestionBox.style.left = "0";
+      suggestionBox.style.display = "none";
+      document.querySelector(".search-bar").appendChild(suggestionBox);
+    }
+    if (!query) {
+      suggestionBox.innerHTML = "";
+      showRecentSearches();
+      suggestionBox.style.display = "block";
+      return;
+    }
+    const liveProducts = getLS("liveProducts");
+    const filtered = liveProducts.filter(item =>
+      item.name.toLowerCase().includes(query) ||
+      (item.desc && item.desc.toLowerCase().includes(query))
+    ).slice(0, 8);
+    if (!filtered.length) {
+      suggestionBox.innerHTML = `<div style="padding:10px;color:#888;">No suggestions</div>`;
+      showRecentSearches();
+      suggestionBox.style.display = "block";
+      return;
+    }
+    suggestionBox.innerHTML = filtered.map(item =>
+      `<div style="padding:10px;cursor:pointer;border-bottom:1px solid #f2f2f2;" 
+        onclick="document.getElementById('searchInput').value='${item.name.replace(/'/g,"\\'")}';searchNewArrivals('${item.name.toLowerCase()}');document.getElementById('searchSuggestionBox').style.display='none';">
+        <i class="fas fa-search" style="color:#ff3e6c;margin-right:7px;"></i>${item.name}
+      </div>`
+    ).join('');
+    showRecentSearches();
+    suggestionBox.style.display = "block";
+  }
+
+  // --- Attach search bar events ---
+  const searchInput = document.getElementById("searchInput");
+  searchInput.addEventListener("input", function() {
+    showSearchSuggestions(this.value.trim().toLowerCase());
+  });
+  searchInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      document.getElementById("searchBtn").click();
+      document.getElementById("searchSuggestionBox")?.remove();
+    }
+    if (e.key === "Escape") {
+      document.getElementById("searchSuggestionBox")?.remove();
+    }
+  });
+  document.getElementById("searchBtn").onclick = function() {
+    const query = searchInput.value.trim().toLowerCase();
+    searchNewArrivals(query);
+    document.getElementById("searchSuggestionBox")?.remove();
+  };
+  document.body.addEventListener("click", function(e) {
+    if (!e.target.closest(".search-bar")) {
+      document.getElementById("searchSuggestionBox")?.remove();
+    }
+  });
+
+  // --- Share Product Feature (Web Share API fallback) ---
+  function shareProduct(productName) {
+    const products = getLS("liveProducts");
+    const prod = products.find(p => p.name === productName);
+    if (!prod) return;
+    const url = window.location.origin + window.location.pathname + `?product=${encodeURIComponent(productName)}`;
+    const shareData = {
+      title: prod.name,
+      text: prod.desc || "Check out this product on Deals99!",
+      url
+    };
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Product link copied to clipboard!");
+      });
+    }
+  }
+  window.shareProduct = shareProduct;
+
+  // --- Toggle Wishlist (add/remove) ---
+  function toggleWishlist(productName) {
+    let wishlist = getLS("wishlist");
+    if (wishlist.includes(productName)) {
+      wishlist = wishlist.filter(n => n !== productName);
+    } else {
+      wishlist.push(productName);
+    }
+    setLS("wishlist", wishlist);
+    updateWishlistCount();
+    renderPublicNewArrivals();
+  }
+  window.toggleWishlist = toggleWishlist;
+
+  // --- Update Wishlist Count (and badge) ---
+  function updateWishlistCount() {
+    const wishlist = getLS("wishlist");
+    const el = document.getElementById("wishlistCount");
+    if (el) el.textContent = wishlist.length;
+    // Optionally update badges on product cards
+    document.querySelectorAll('.product-card').forEach(card => {
+      const name = card.querySelector('strong')?.textContent;
+      if (!name) return;
+      const badge = card.querySelector('.wishlist-badge');
+      if (wishlist.includes(name)) {
+        if (!badge) {
+          const badgeDiv = document.createElement('div');
+          badgeDiv.className = 'wishlist-badge';
+          badgeDiv.title = 'In Wishlist';
+          badgeDiv.style = 'position:absolute;top:10px;right:12px;color:#e63946;font-size:1.2em;background:#fff;border-radius:50%;padding:2px 6px;box-shadow:0 2px 8px #0001;';
+          badgeDiv.innerHTML = '<i class="fas fa-heart"></i>';
+          card.appendChild(badgeDiv);
+        }
+        card.querySelector('.add-to-wishlist-btn')?.classList.add('active');
+      } else {
+        if (badge) badge.remove();
+        card.querySelector('.add-to-wishlist-btn')?.classList.remove('active');
+      }
+    });
+  }
+
+  // --- Cart Functions (add these if missing) ---
+  function addToCart(productName) {
+    let cart = getLS("cart");
+    cart.push(productName);
+    setLS("cart", cart);
+    alert(`🛒 "${productName}" added to cart!`);
+    // Optionally update cart icon/badge here if you have such a function
+  }
+  window.addToCart = addToCart;
+
+  function buyNow(productName) {
+    addToCart(productName);
+    window.location.href = "cart.html";
+  }
+  window.buyNow = buyNow;
+
+  // --- Product Quick View Modal ---
+  function quickViewProduct(productName) {
+    const allProducts = getLS("liveProducts");
+    const prod = allProducts.find(p => p.name === productName);
+    if (!prod) return;
+    document.getElementById("loginModalBg").innerHTML = `
+      <div class="login-modal-bg" onclick="closeLoginModal(event)">
+        <div class="login-modal" style="max-width:400px;" onclick="event.stopPropagation();">
+          <button class="close-btn" onclick="closeLoginModal(event);return false;">&times;</button>
+          <h2>${prod.name}</h2>
+          <img src="${Array.isArray(prod.img) ? prod.img[0] : (prod.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${prod.name}" style="width:120px;height:120px;object-fit:contain;margin:10px auto;display:block;">
+          <div style="margin:10px 0;">
+            ${prod.mrp && prod.mrp != prod.price ? `<span class="mrp">₹${prod.mrp}</span> ` : ""}
+            <span class="discounted">₹${prod.price}</span>
+          </div>
+          <div style="color:#888;font-size:1em;margin-bottom:10px;">${prod.desc || ""}</div>
+          <button class="add-to-cart-btn" onclick="addToCart('${prod.name}')">
+            <i class="fas fa-cart-plus"></i> Add to Cart
+          </button>
+          <button class="buy-now" onclick="buyNow('${prod.name}')">Buy Now</button>
+          <button class="add-to-wishlist-btn" onclick="toggleWishlist('${prod.name}')">
+            <i class="fas fa-heart"></i> Wishlist
+          </button>
+          <button class="share-btn" onclick="shareProduct('${prod.name.replace(/'/g,"\\'")}')">
+            <i class="fas fa-share-alt"></i> Share
+          </button>
+        </div>
+      </div>
+    `;
+    document.getElementById("loginModalBg").style.display = "flex";
+  }
+  window.quickViewProduct = quickViewProduct;
+
+  // --- Add Quick View Button to Product Cards ---
+  function enhanceProductCardsWithQuickView() {
+    document.querySelectorAll('.product-card').forEach(card => {
+      if (!card.querySelector('.quick-view-btn')) {
+        const name = card.querySelector('strong')?.textContent;
+        if (name) {
+          const btn = document.createElement('button');
+          btn.className = 'quick-view-btn';
+          btn.style = 'margin-top:6px;background:#fff;color:#457b9d;border:1px solid #457b9d;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.97em;';
+          btn.innerHTML = '<i class="fas fa-eye"></i> Quick View';
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            quickViewProduct(name);
+          };
+          card.querySelector('.product-info').appendChild(btn);
+        }
+      }
+      // Add share button if not present
+      if (!card.querySelector('.share-btn')) {
+        const name = card.querySelector('strong')?.textContent;
+        if (name) {
+          const btn = document.createElement('button');
+          btn.className = 'share-btn';
+          btn.style = 'margin-top:6px;background:#fff;color:#219150;border:1px solid #219150;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.97em;';
+          btn.innerHTML = '<i class="fas fa-share-alt"></i> Share';
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            shareProduct(name);
+          };
+          card.querySelector('.product-info').appendChild(btn);
+        }
+      }
+    });
+  }
+
+  // --- Render Today ₹99 Deals ---
+  function renderToday99Deals() {
+    const deals = getLS("today99deals");
+    const grid = document.getElementById("today99Grid");
+    if (!grid) return;
+    if (!deals.length) {
+      grid.innerHTML = `<div style="color:#888;text-align:center;">No ₹99 deals today.</div>`;
+      return;
+    }
+    grid.innerHTML = deals.map(item => `
+      <div class="deal-card">
+        <img src="${Array.isArray(item.img) ? item.img[0] : (item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${item.name}" />
+        <h3>${item.name}</h3>
+        <div>
+          ${item.mrp && item.mrp != item.discounted ? `<span class="mrp">₹${item.mrp}</span> ` : ""}
+          <span class="price-tag">₹${item.discounted}</span>
+        </div>
+        <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+        <button class="add-to-cart-btn" onclick="addToCart('${item.name}')">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+        <button class="buy-now" onclick="buyNow('${item.name}')">Buy Now</button>
+        <button class="add-to-wishlist-btn" onclick="toggleWishlist('${item.name}')">
+          <i class="fas fa-heart"></i> Wishlist
+        </button>
+        <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+          <i class="fas fa-eye"></i> Quick View
+        </button>
+        <button class="share-btn" onclick="shareProduct('${item.name.replace(/'/g,"\\'")}')">
+          <i class="fas fa-share-alt"></i> Share
+        </button>
+      </div>
+    `).join('');
+  }
+
+  // --- Render Public New Arrivals (Live Products) ---
+  function renderPublicNewArrivals() {
+    const liveProducts = getLS("liveProducts");
+    const grouped = {};
+    liveProducts.forEach(item => {
+      const cat = item.category || "Other";
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(item);
+    });
+    const container = document.getElementById("publicNewArrivals");
+    if (!container) return;
+    container.innerHTML = "";
+    const cats = Object.keys(grouped);
+    if (!cats.length) {
+      container.innerHTML = `<div style="color:#888;text-align:center;">No new arrivals yet.</div>`;
+      return;
+    }
+    cats.forEach(cat => {
+      const items = grouped[cat];
+      const section = document.createElement("div");
+      section.className = "category-product-section";
+      section.innerHTML = `
+        <h3 style="margin:18px 0 10px 0;color:#1d3557;">${cat}</h3>
+        <div class="products-flex">
+          ${items.map(item => {
+            const wishlist = getLS("wishlist");
+            const inWishlist = wishlist.includes(item.name);
+            return `
+            <div class="product-card">
+              ${inWishlist ? `<div class="wishlist-badge" title="In Wishlist" style="position:absolute;top:10px;right:12px;color:#e63946;font-size:1.2em;background:#fff;border-radius:50%;padding:2px 6px;box-shadow:0 2px 8px #0001;"><i class="fas fa-heart"></i></div>` : ""}
+              <img src="${Array.isArray(item.img) ? item.img[0] : (item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${item.name}" />
+              <div class="product-info">
+                <strong>${item.name}</strong>
+                <div>
+                  ${item.mrp && item.mrp != item.price ? `<span class="mrp">₹${item.mrp}</span> ` : ""}
+                  <span class="discounted">₹${item.price}</span>
+                </div>
+                ${
+                  (typeof item.stock === "number" && item.stock < 5)
+                    ? `<div style="color:#e67e22;font-size:0.97em;font-weight:500;">Few pieces left!</div>`
+                    : ""
+                }
+                <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+                <button class="add-to-cart-btn" onclick="addToCart('${item.name}')">
+                  <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+                <button class="buy-now" onclick="buyNow('${item.name}')">Buy Now</button>
+                <button class="add-to-wishlist-btn${inWishlist ? ' active' : ''}" onclick="toggleWishlist('${item.name}')">
+                  <i class="fas fa-heart"></i> Wishlist
+                </button>
+                <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+                  <i class="fas fa-eye"></i> Quick View
+                </button>
+                <button class="share-btn" onclick="shareProduct('${item.name.replace(/'/g,"\\'")}')">
+                  <i class="fas fa-share-alt"></i> Share
+                </button>
+              </div>
+            </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+      container.appendChild(section);
+    });
+    enhanceProductCardsWithQuickView();
+    updateWishlistCount();
+  }
+
+  // --- Render Special Offers ---
+  function renderSpecialOffers() {
+    const offers = getLS("specialOffers");
+    const grid = document.getElementById("specialOffersGrid");
+    if (!grid) return;
+    if (!offers.length) {
+      grid.innerHTML = `<div style="color:#888;text-align:center;">No special offers available.</div>`;
+      return;
+    }
+    grid.innerHTML = offers.map(offer => `
+      <div class="special-offer-block">
+        <div class="special-offer-title">
+          <i class="fas fa-bolt"></i> ${offer.title}
+        </div>
+        <div style="color:#888;margin-bottom:8px;">${offer.desc}</div>
+        <div style="font-size:0.97em;color:#219150;margin-bottom:10px;">
+          Valid till: ${offer.validTill ? new Date(offer.validTill).toLocaleString() : "N/A"}
+        </div>
+        <div class="products-flex">
+          ${
+            (offer.products && offer.products.length)
+              ? offer.products.map(item => `
+                <div class="product-card">
+                  <img src="${Array.isArray(item.img) ? item.img[0] : (item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${item.name}" />
+                  <div class="product-info">
+                    <strong>${item.name}</strong>
+                    <div>
+                      ${item.mrp && item.mrp != item.price ? `<span class="mrp">₹${item.mrp}</span> ` : ""}
+                      <span class="discounted">₹${item.price}</span>
+                    </div>
+                    <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+                    <button class="add-to-cart-btn" onclick="addToCart('${item.name}')">
+                      <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                    <button class="buy-now" onclick="buyNow('${item.name}')">Buy Now</button>
+                    <button class="add-to-wishlist-btn" onclick="toggleWishlist('${item.name}')">
+                      <i class="fas fa-heart"></i> Wishlist
+                    </button>
+                    <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+                      <i class="fas fa-eye"></i> Quick View
+                    </button>
+                    <button class="share-btn" onclick="shareProduct('${item.name.replace(/'/g,"\\'")}')">
+                      <i class="fas fa-share-alt"></i> Share
+                    </button>
+                  </div>
+                </div>
+              `).join("")
+              : `<div style="color:#aaa;font-size:1.05em;">No products in this offer.</div>`
+          }
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // --- Newsletter Form ---
+  document.getElementById("newsletterForm").onsubmit = function(e) {
+    e.preventDefault();
+    const email = document.getElementById("newsletterEmail").value.trim();
+    const msg = document.getElementById("newsletterMsg");
+    if (!email.match(/^[^@]+@[^@]+\.[^@]+$/)) {
+      msg.textContent = "Please enter a valid email.";
+      msg.style.color = "#e63946";
+      return;
+    }
+    msg.textContent = "Thank you for subscribing!";
+    msg.style.color = "#27ae60";
+    document.getElementById("newsletterEmail").value = "";
+  };
+
+  // --- Smooth Scroll Navigation ---
+  function scrollToSection(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  }
+  window.scrollToSection = scrollToSection;
+
+  // --- Profile dropdown logic
+  document.getElementById("profileIconBtn").onclick = function(e) {
+    e.stopPropagation();
+    document.getElementById("profileDropdown").classList.toggle("open");
+  };
+  document.body.onclick = function() {
+    document.getElementById("profileDropdown").classList.remove("open");
+  };
+  document.getElementById("profileMenu").onclick = function(e) { e.stopPropagation(); };
+
+  // --- Admin Login Modal ---
+  function showAdminLoginModal() {
+    document.getElementById("loginModalBg").innerHTML = `
+      <div class="login-modal-bg" onclick="closeLoginModal(event)">
+        <form class="login-modal" id="adminLoginForm" autocomplete="on" onclick="event.stopPropagation(); return false;">
+          <button class="close-btn" onclick="closeLoginModal(event);return false;">&times;</button>
+          <h2>Admin Login</h2>
+          <div id="adminLoginError" class="auth-error"></div>
+          <input type="email" id="adminLoginEmail" placeholder="Admin Email" autocomplete="email" required />
+          <input type="password" id="adminLoginPassword" placeholder="Password" autocomplete="current-password" required />
+          <button id="adminLoginBtn" type="button">Login</button>
+        </form>
+      </div>
+    `;
+    document.getElementById("loginModalBg").style.display = "flex";
+    document.getElementById("adminLoginEmail").focus();
+
+    document.getElementById("adminLoginBtn").onclick = function() {
+      const emailInput = document.getElementById("adminLoginEmail");
+      const passwordInput = document.getElementById("adminLoginPassword");
+      const errorDiv = document.getElementById("adminLoginError");
+      if (!emailInput || !passwordInput) {
+        errorDiv.textContent = "Login form not loaded. Please try again.";
+        return;
+      }
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      errorDiv.textContent = "";
+      if (email === "admin@deals99.in" && password === "Admin@123") {
+        localStorage.setItem("isAdminLoggedIn", "true");
+        errorDiv.className = "auth-success";
+        errorDiv.textContent = "Login successful! Redirecting...";
+        setTimeout(() => {
+          closeLoginModal();
+          window.location.href = "admin.html";
+        }, 800);
+      } else {
+        errorDiv.textContent = "Invalid admin credentials.";
+      }
+    };
+  }
+
+  // Show Login Modal for user login
+  function showLoginModal() {
+    document.getElementById("loginModalBg").innerHTML = `
+      <div class="login-modal-bg" onclick="closeLoginModal(event)">
+        <form class="login-modal" id="userLoginForm" autocomplete="on" onclick="event.stopPropagation(); return false;">
+          <button class="close-btn" onclick="closeLoginModal(event);return false;">&times;</button>
+          <h2>Login</h2>
+          <div id="userLoginError" class="auth-error"></div>
+          <input type="email" id="userLoginEmail" placeholder="Email" autocomplete="email" required />
+          <input type="password" id="userLoginPassword" placeholder="Password" autocomplete="current-password" required />
+          <button id="userLoginBtn" type="button">Login</button>
+        </form>
+      </div>
+    `;
+    document.getElementById("loginModalBg").style.display = "flex";
+    document.getElementById("userLoginEmail").focus();
+
+    document.getElementById("userLoginBtn").onclick = function() {
+      const emailInput = document.getElementById("userLoginEmail");
+      const passwordInput = document.getElementById("userLoginPassword");
+      const errorDiv = document.getElementById("userLoginError");
+      if (!emailInput || !passwordInput) {
+        errorDiv.textContent = "Login form not loaded. Please try again.";
+        return;
+      }
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      errorDiv.textContent = "";
+      // Demo: Accept any non-empty credentials
+      if (email && password) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("currentUser", JSON.stringify({ name: email.split("@")[0], email }));
+        errorDiv.className = "auth-success";
+        errorDiv.textContent = "Login successful! Reloading...";
+        setTimeout(() => {
+          closeLoginModal();
+          location.reload();
+        }, 800);
+      } else {
+        errorDiv.textContent = "Invalid credentials.";
+      }
+    };
+  }
+
+  // Helper to close modal
+  function closeLoginModal(e) {
+    if (e) e.preventDefault();
+    document.getElementById("loginModalBg").style.display = "none";
+    document.getElementById("loginModalBg").innerHTML = "";
+  }
+
+  // --- Profile greeting and logout ---
+  function updateProfileMenu() {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    const greeting = isLoggedIn && user.name
+      ? `<i class="fas fa-user-circle"></i> Hi, ${user.name.split(" ")[0]}`
+      : `<span id="guestLoginLink" style="cursor:pointer;color:#1d3557;"><i class="fas fa-user-circle"></i> Guest</span>`;
+    document.getElementById("profileMenuGreeting").innerHTML = greeting;
+    document.getElementById("logoutBtn").style.display = isLoggedIn ? "block" : "none";
+
+    // Add click event to Guest to open login/signup modal
+    if (!isLoggedIn) {
+      const guestLink = document.getElementById("guestLoginLink");
+      if (guestLink) {
+        guestLink.onclick = function(e) {
+          e.stopPropagation();
+          showLoginModal();
+          document.getElementById("profileDropdown").classList.remove("open");
+        };
+      }
+    }
+  }
+  updateProfileMenu();
+
+  // --- Admin quick access from header (optional) ---
+  document.addEventListener("DOMContentLoaded", function() {
+    // If you want to allow admin login from the profile dropdown, add this:
+    const adminLink = document.createElement("a");
+    adminLink.href = "#";
+    adminLink.innerHTML = `<i class="fas fa-user-shield"></i> Admin Login`;
+    adminLink.onclick = function(e) {
+      e.preventDefault();
+      showAdminLoginModal();
+      document.getElementById("profileDropdown").classList.remove("open");
+    };
+    // Insert before logout button in profile menu
+    const profileMenu = document.getElementById("profileMenu");
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (profileMenu && logoutBtn) {
+      profileMenu.insertBefore(adminLink, logoutBtn);
+    }
+  });
+
+  // Logout functionality
+  document.getElementById("logoutBtn").onclick = function() {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("currentUser");
+    updateProfileMenu();
+    alert("Logged out!");
+    location.reload();
+  };
+
+  // Wishlist logic
+  function updateWishlistCount() {
+    const wishlist = getLS("wishlist");
+    document.getElementById("wishlistCount").textContent = wishlist.length;
+  }
+  updateWishlistCount();
+
+  document.getElementById("wishlistBtn").onclick = function() {
+    window.location.href = "wishlist.html";
+  };
+
+  // --- Initial Render ---
+  document.addEventListener("DOMContentLoaded", function() {
+    renderPublicNewArrivals();
+    renderToday99Deals();
+    renderSpecialOffers();
+    updateWishlistCount();
+  });
+  </script>
+</body>
+</html>

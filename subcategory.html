@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subcategory | Deals99</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .subcategory-section { margin: 40px auto; max-width: 1100px; }
+        .subcategory-section h2 { color: #1d3557; margin-bottom: 18px; }
+        .subcat-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .subcat-link {
+            background: #f3f7fa;
+            color: #1d3557;
+            border-radius: 6px;
+            padding: 7px 18px;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid #e0e0e0;
+            transition: background 0.18s, color 0.18s;
+            cursor: pointer;
+        }
+        .subcat-link.active, .subcat-link:hover {
+            background: #ff3e6c;
+            color: #fff;
+        }
+        .products-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 12px;
+        }
+        .product-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px #0001;
+            padding: 14px;
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: box-shadow 0.18s, transform 0.13s;
+            position: relative;
+        }
+        .product-card:hover {
+            box-shadow: 0 8px 28px #ff3e6c22;
+            transform: translateY(-4px) scale(1.04);
+        }
+        .product-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #f7f7fa;
+        }
+        .product-info {
+            text-align: center;
+        }
+        .add-to-cart-btn {
+            margin-top: 8px;
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 7px 16px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.18s;
+        }
+        .add-to-cart-btn:hover {
+            background: #219150;
+        }
+        .wishlist-btn {
+            background: #fff;
+            color: #e63946;
+            border: 1px solid #e63946;
+            border-radius: 5px;
+            padding: 6px 12px;
+            margin-top: 6px;
+            font-size: 0.98em;
+            cursor: pointer;
+            transition: background 0.18s, color 0.18s;
+        }
+        .wishlist-btn.active, .wishlist-btn:hover {
+            background: #e63946;
+            color: #fff;
+        }
+        .quick-view-btn {
+            background: #457b9d;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            margin-top: 6px;
+            font-size: 0.98em;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        .quick-view-btn:hover {
+            background: #1d3557;
+        }
+        .wishlist-badge {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            color: #e63946;
+            font-size: 1.2em;
+            background: #fff;
+            border-radius: 50%;
+            padding: 2px 6px;
+            box-shadow: 0 2px 8px #0001;
+        }
+        @media (max-width: 700px) {
+            .products-flex { gap: 12px; }
+            .product-card { width: 100%; min-width: 0; }
+            .subcat-list { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="text-align:center;margin:32px 0 18px 0;" id="subcategoryTitle">Subcategory</h1>
+    </header>
+    <main id="subcategoryMain"></main>
+    <div id="quickViewModalBg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0008;"></div>
+    <script>
+        // --- Category to subcategories mapping ---
+        const categorySubcategories = {
+            "Fashion": [
+                "Men's T-Shirts",
+                "Women's Dresses",
+                "Kids Wear",
+                "Accessories",
+                "Ethnic Wear",
+                "Footwear",
+                "Bags & Wallets",
+                "All"
+            ],
+            "Electronics": [
+                "Mobiles",
+                "Laptops",
+                "Earphones",
+                "Smart Watches",
+                "Tablets",
+                "Power Banks",
+                "Speakers",
+                "All"
+            ],
+            "Keychains": [
+                "Superhero Keychains",
+                "Name Keychains",
+                "Photo Keychains",
+                "Metal Keychains",
+                "Wooden Keychains",
+                "Cartoon Keychains",
+                "All"
+            ],
+            "Gifts": [
+                "Birthday Gifts",
+                "Anniversary Gifts",
+                "Personalized Gifts",
+                "Gift Hampers",
+                "Greeting Cards",
+                "Flowers",
+                "All"
+            ],
+            "Other": [
+                "Home Decor",
+                "Stationery",
+                "Toys",
+                "Kitchenware",
+                "Fitness",
+                "Other",
+                "All"
+            ]
+        };
+
+        // --- Wishlist utility ---
+        function getWishlist() {
+            return JSON.parse(localStorage.getItem("wishlist")) || [];
+        }
+        function setWishlist(arr) {
+            localStorage.setItem("wishlist", JSON.stringify(arr));
+        }
+
+        // --- Quick View Modal ---
+        function quickViewProduct(productName) {
+            const allProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+            const prod = allProducts.find(p => p.name === productName);
+            if (!prod) return;
+            document.getElementById("quickViewModalBg").innerHTML = `
+                <div class="login-modal-bg" onclick="closeQuickViewModal(event)">
+                  <div class="login-modal" style="max-width:400px;" onclick="event.stopPropagation();">
+                    <button class="close-btn" onclick="closeQuickViewModal(event);return false;">&times;</button>
+                    <h2>${prod.name}</h2>
+                    <img src="${Array.isArray(prod.img) ? prod.img[0] : (prod.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${prod.name}" style="width:120px;height:120px;object-fit:contain;margin:10px auto;display:block;">
+                    <div style="margin:10px 0;">
+                      ${prod.mrp && prod.mrp != prod.price ? `<span style="text-decoration:line-through;color:#888;">₹${prod.mrp}</span> ` : ""}
+                      <span style="color:#ff3e6c;font-weight:bold;">₹${prod.price}</span>
+                    </div>
+                    <div style="color:#888;font-size:1em;margin-bottom:10px;">${prod.desc || ""}</div>
+                    <button class="add-to-cart-btn" onclick="addToCart('${prod.name.replace(/'/g,"\\'")}')">
+                      <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                    <button class="wishlist-btn" onclick="toggleWishlist('${prod.name.replace(/'/g,"\\'")}')">
+                      <i class="fas fa-heart"></i> Wishlist
+                    </button>
+                  </div>
+                </div>
+            `;
+            document.getElementById("quickViewModalBg").style.display = "flex";
+        }
+        function closeQuickViewModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById("quickViewModalBg").style.display = "none";
+            document.getElementById("quickViewModalBg").innerHTML = "";
+        }
+        window.quickViewProduct = quickViewProduct;
+        window.closeQuickViewModal = closeQuickViewModal;
+
+        // --- Wishlist functionality ---
+        function toggleWishlist(productName) {
+            let wishlist = getWishlist();
+            if (wishlist.includes(productName)) {
+                wishlist = wishlist.filter(n => n !== productName);
+            } else {
+                wishlist.push(productName);
+            }
+            setWishlist(wishlist);
+            renderSubcategoryProducts();
+        }
+        window.toggleWishlist = toggleWishlist;
+
+        // --- Get subcategory and category from URL ---
+        function getSubcategoryFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("subcat") || "";
+        }
+        function getCategoryFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("cat") || "";
+        }
+
+        // --- Try to guess the category from the subcategory name ---
+        function guessCategory(subcat) {
+            for (const [cat, subcats] of Object.entries(categorySubcategories)) {
+                if (subcats.map(s => s.toLowerCase()).includes(subcat.toLowerCase())) {
+                    return cat;
+                }
+            }
+            return "";
+        }
+
+        // --- Render subcategory navigation and products ---
+        function renderSubcategoryProducts() {
+            const subcat = getSubcategoryFromUrl();
+            let category = getCategoryFromUrl();
+            if (!category) category = guessCategory(subcat) || "Fashion";
+            document.getElementById("subcategoryTitle").textContent = subcat ? subcat : "Subcategory";
+            const subcategories = categorySubcategories[category] || [];
+            const liveProducts = JSON.parse(localStorage.getItem("liveProducts")) || [];
+            const wishlist = getWishlist();
+            // Filter products by subcategory (case-insensitive), or show all if "All" is selected
+            const filtered = (subcat && subcat !== "All")
+                ? liveProducts.filter(item =>
+                    (item.category && item.category.toLowerCase() === category.toLowerCase()) &&
+                    (
+                        (item.subcategory && item.subcategory.toLowerCase() === subcat.toLowerCase()) ||
+                        (!item.subcategory && item.name && item.name.toLowerCase().includes(subcat.toLowerCase()))
+                    )
+                )
+                : liveProducts.filter(item => item.category && item.category.toLowerCase() === category.toLowerCase());
+            const main = document.getElementById("subcategoryMain");
+            main.innerHTML = `
+                <section class="subcategory-section">
+                    <div style="margin-bottom:10px;font-size:1.1em;">
+                        <b>Category:</b> ${category}
+                    </div>
+                    <div class="subcat-list">
+                        ${subcategories.map(s =>
+                            `<a class="subcat-link${s === subcat ? ' active' : ''}" href="subcategory.html?subcat=${encodeURIComponent(s)}&cat=${encodeURIComponent(category)}">${s}</a>`
+                        ).join("")}
+                    </div>
+                    <h2>Products in "${subcat || 'All'}"</h2>
+                    <div class="products-flex">
+                        ${
+                            filtered.length
+                                ? filtered.map(item => `
+                                    <div class="product-card">
+                                        ${wishlist.includes(item.name) ? `<div class="wishlist-badge" title="In Wishlist"><i class="fas fa-heart"></i></div>` : ""}
+                                        <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" alt="${item.name}" />
+                                        <div class="product-info">
+                                            <strong>${item.name}</strong>
+                                            <div>
+                                                ${item.mrp && item.mrp != item.price ? `<span style="text-decoration:line-through;color:#888;">₹${item.mrp}</span> ` : ""}
+                                                <span style="color:#ff3e6c;font-weight:bold;">₹${item.price}</span>
+                                            </div>
+                                            ${
+                                                (typeof item.stock === "number" && item.stock < 5)
+                                                    ? `<div style="color:#e67e22;font-size:0.97em;font-weight:500;">Few pieces left!</div>`
+                                                    : ""
+                                            }
+                                            <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+                                            <button class="add-to-cart-btn" onclick="addToCart('${item.name.replace(/'/g,"\\'")}')">
+                                                <i class="fas fa-cart-plus"></i> Add to Cart
+                                            </button>
+                                            <button class="wishlist-btn${wishlist.includes(item.name) ? ' active' : ''}" onclick="toggleWishlist('${item.name.replace(/'/g,"\\'")}')">
+                                                <i class="fas fa-heart"></i> Wishlist
+                                            </button>
+                                            <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+                                                <i class="fas fa-eye"></i> Quick View
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join("")
+                                : `<div style="color:#aaa;font-size:1.05em;">No products in this subcategory yet.</div>`
+                        }
+                    </div>
+                </section>
+            `;
+        }
+
+        // --- Add to Cart functionality ---
+        function addToCart(productName) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push(productName);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert(`🛒 "${productName}" added to cart!`);
+            if (typeof updateCartIcon === "function") updateCartIcon();
+            if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+        }
+
+        document.addEventListener("DOMContentLoaded", renderSubcategoryProducts);
+        window.addEventListener("popstate", renderSubcategoryProducts);
+    </script>
+</body>
+</html>

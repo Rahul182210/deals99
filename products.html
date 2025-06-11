@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Manage Products | Deals99</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fa; margin: 0; }
+        .admin-products-container { max-width: 1200px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 16px #0001; padding: 32px; }
+        .admin-products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .admin-products-header h2 { margin: 0; }
+        .admin-products-header button { background: #e74c3c; color: #fff; border: none; border-radius: 5px; padding: 8px 18px; cursor: pointer; }
+        .category-tabs { display: flex; gap: 18px; margin-bottom: 18px; }
+        .category-tab { padding: 7px 18px; border-radius: 5px; background: #f1f1f1; cursor: pointer; font-weight: 500; }
+        .category-tab.active { background: #457b9d; color: #fff; }
+        .admin-products-search { margin-bottom: 18px; }
+        .admin-products-search input { width: 320px; max-width: 100%; padding: 7px 12px; border-radius: 5px; border: 1px solid #ccc; }
+        .admin-products-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .admin-products-table th, .admin-products-table td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: left; }
+        .admin-products-table th { background: #f6f8fa; }
+        .admin-products-table img { width: 40px; height: 40px; border-radius: 5px; object-fit: cover; }
+        .admin-action-btn { margin-right: 6px; padding: 5px 12px; border: none; border-radius: 4px; cursor: pointer; background: #457b9d; color: #fff; }
+        .admin-action-btn.remove { background: #e74c3c; }
+        .admin-action-btn.edit { background: #f1c40f; color: #222; }
+        .admin-action-btn.save { background: #27ae60; }
+        .admin-action-btn.cancel { background: #888; }
+        @media (max-width: 800px) {
+            .admin-products-container { padding: 10px; }
+            .admin-products-table th, .admin-products-table td { font-size: 0.97em; }
+            .admin-products-header { flex-direction: column; gap: 10px; }
+            .category-tabs { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-products-container">
+        <div class="admin-products-header">
+            <h2><i class="fas fa-boxes"></i> Manage Products</h2>
+            <button onclick="window.location.href='admin.html'"><i class="fas fa-arrow-left"></i> Back to Admin Panel</button>
+        </div>
+        <div class="category-tabs" id="categoryTabs"></div>
+        <div class="admin-products-search">
+            <input type="text" id="productSearchInput" placeholder="Search products by name, desc, or category...">
+        </div>
+        <div id="adminProductsTable"></div>
+    </div>
+
+    <script>
+        // --- Category and Subcategory Definitions (match home page) ---
+        const CATEGORY_DEFS = [
+            {
+                name: "Fashion",
+                icon: "fa-tshirt",
+                desc: "Clothing, Accessories",
+                subcategories: [
+                    "Men's T-Shirts", "Women's Dresses", "Kids Wear", "Accessories", "Ethnic Wear", "Footwear", "Bags & Wallets", "All"
+                ]
+            },
+            {
+                name: "Electronics",
+                icon: "fa-laptop",
+                desc: "Mobiles, Gadgets",
+                subcategories: [
+                    "Mobiles", "Laptops", "Earphones", "Smart Watches", "Tablets", "Power Banks", "Speakers", "All"
+                ]
+            },
+            {
+                name: "Keychains",
+                icon: "fa-key",
+                desc: "Customized, Cool",
+                subcategories: [
+                    "Superhero Keychains", "Name Keychains", "Photo Keychains", "Metal Keychains", "Wooden Keychains", "Cartoon Keychains", "All"
+                ]
+            },
+            {
+                name: "Gifts",
+                icon: "fa-gift",
+                desc: "Surprise Gifts",
+                subcategories: [
+                    "Birthday Gifts", "Anniversary Gifts", "Personalized Gifts", "Gift Hampers", "Greeting Cards", "Flowers", "All"
+                ]
+            },
+            {
+                name: "Other",
+                icon: "fa-star",
+                desc: "More Deals",
+                subcategories: [
+                    "Home Decor", "Stationery", "Toys", "Kitchenware", "Fitness", "Other", "All"
+                ]
+            }
+        ];
+
+        // --- Utility functions ---
+        function getLS(key) {
+            return JSON.parse(localStorage.getItem(key)) || [];
+        }
+        function setLS(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        // --- Gather all products from all sources ---
+        function getAllProducts() {
+            const live = getLS("liveProducts").map(p => ({...p, _source: "Live"}));
+            const arrivals = getLS("arrivals").map(p => ({...p, _source: "Arrivals"}));
+            const today99 = getLS("today99deals").map(p => ({...p, _source: "Today99"}));
+            // Remove duplicates by name, keep first occurrence
+            const all = [...live, ...arrivals, ...today99];
+            const seen = new Set();
+            return all.filter(p => {
+                if (seen.has(p.name)) return false;
+                seen.add(p.name);
+                return true;
+            });
+        }
+
+        // --- Render category tabs and subcategory tabs ---
+        function renderCategoryTabs(products, activeCat, activeSubcat) {
+            const cats = Array.from(new Set(products.map(p => p.category || "Other")));
+            const tabs = ['All', ...cats];
+            const tabsDiv = document.getElementById("categoryTabs");
+            tabsDiv.innerHTML = tabs.map(cat =>
+                `<div class="category-tab${cat === activeCat ? ' active' : ''}" data-cat="${cat}">${cat}</div>`
+            ).join('');
+            tabsDiv.querySelectorAll('.category-tab').forEach(tab => {
+                tab.onclick = function() {
+                    renderProductsTable(this.dataset.cat, '', 'All');
+                    tabsDiv.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                };
+            });
+
+            // Subcategory tabs
+            const subcatDivId = "subcategoryTabs";
+            let subcatDiv = document.getElementById(subcatDivId);
+            if (!subcatDiv) {
+                subcatDiv = document.createElement("div");
+                subcatDiv.id = subcatDivId;
+                subcatDiv.className = "category-tabs";
+                tabsDiv.parentNode.insertBefore(subcatDiv, tabsDiv.nextSibling);
+            }
+            let subcats = [];
+            if (activeCat && activeCat !== "All") {
+                const def = CATEGORY_DEFS.find(c => c.name === activeCat);
+                if (def) subcats = def.subcategories.filter(s => s !== "All");
+            }
+            if (subcats.length) {
+                subcatDiv.innerHTML = ['All', ...subcats].map(sub =>
+                    `<div class="category-tab${sub === activeSubcat ? ' active' : ''}" data-subcat="${sub}">${sub}</div>`
+                ).join('');
+                subcatDiv.querySelectorAll('.category-tab').forEach(tab => {
+                    tab.onclick = function() {
+                        renderProductsTable(activeCat, '', this.dataset.subcat);
+                        subcatDiv.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                        this.classList.add('active');
+                    };
+                });
+                subcatDiv.style.display = "flex";
+            } else {
+                subcatDiv.innerHTML = "";
+                subcatDiv.style.display = "none";
+            }
+        }
+
+        // --- Render products table ---
+        function renderProductsTable(category = 'All', search = '', subcategory = 'All') {
+            const allProducts = getAllProducts();
+            let products = allProducts;
+            if (category && category !== 'All') {
+                products = products.filter(p => (p.category || "Other") === category);
+            }
+            if (subcategory && subcategory !== 'All') {
+                products = products.filter(p => (p.subcategory || "") === subcategory);
+            }
+            if (search) {
+                products = products.filter(p =>
+                    (p.name && p.name.toLowerCase().includes(search)) ||
+                    (p.desc && p.desc.toLowerCase().includes(search)) ||
+                    (p.category && p.category.toLowerCase().includes(search)) ||
+                    (p.subcategory && p.subcategory.toLowerCase().includes(search))
+                );
+            }
+            renderCategoryTabs(allProducts, category, subcategory);
+
+            const tableDiv = document.getElementById("adminProductsTable");
+            if (!products.length) {
+                tableDiv.innerHTML = `<div style="color:#888;text-align:center;margin:30px 0;">No products found.</div>`;
+                return;
+            }
+            let html = `<table class="admin-products-table"><thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>MRP</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Min Qty</th>
+                    <th>Category</th>
+                    <th>Subcategory</th>
+                    <th>Source</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead><tbody>`;
+            products.forEach((p, idx) => {
+                html += `<tr>
+                    <td>${Array.isArray(p.img) ? `<img src="${p.img[0]}" alt="${p.name}">` : `<img src="${p.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" alt="${p.name}">`}</td>
+                    <td>${p.name}</td>
+                    <td>₹${p.mrp || ""}</td>
+                    <td>₹${p.price || p.discounted || ""}</td>
+                    <td>${p.stock ?? ""}</td>
+                    <td>${p.minQty ?? ""}</td>
+                    <td>${p.category || ""}</td>
+                    <td>${p.subcategory || ""}</td>
+                    <td>${p._source || ""}</td>
+                    <td style="max-width:180px;white-space:pre-line;">${p.desc || ""}</td>
+                    <td>
+                        <button class="admin-action-btn edit" onclick="editProduct('${encodeURIComponent(p.name)}')"><i class="fas fa-edit"></i></button>
+                        <button class="admin-action-btn remove" onclick="removeProduct('${encodeURIComponent(p.name)}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            html += "</tbody></table>";
+            tableDiv.innerHTML = html;
+        }
+
+        // --- Edit Product ---
+        window.editProduct = function(name) {
+            name = decodeURIComponent(name);
+            let all = getAllProducts();
+            let prod = all.find(p => p.name === name);
+            if (!prod) return alert("Product not found.");
+            const newName = prompt("Edit product name:", prod.name);
+            if (newName === null) return;
+            const newMRP = prompt("Edit MRP:", prod.mrp || "");
+            if (newMRP === null) return;
+            const newPrice = prompt("Edit Price:", prod.price || prod.discounted || "");
+            if (newPrice === null) return;
+            const newStock = prompt("Edit Stock:", prod.stock ?? "");
+            if (newStock === null) return;
+            const newMinQty = prompt("Edit Min Qty:", prod.minQty ?? "");
+            if (newMinQty === null) return;
+            // Use select for category
+            let catOptions = CATEGORY_DEFS.map(c => c.name).join(", ");
+            const newCat = prompt(`Edit Category:\nOptions: ${catOptions}`, prod.category || "");
+            if (newCat === null) return;
+            // Use select for subcategory
+            let subcatOptions = (CATEGORY_DEFS.find(c => c.name === newCat)?.subcategories || []).join(", ");
+            const newSubcat = prompt(`Edit Subcategory:\nOptions: ${subcatOptions}`, prod.subcategory || "");
+            if (newSubcat === null) return;
+            const newDesc = prompt("Edit Description:", prod.desc || "");
+            if (newDesc === null) return;
+
+            // Update in all sources
+            ["liveProducts", "arrivals", "today99deals"].forEach(key => {
+                let arr = getLS(key);
+                let idx = arr.findIndex(p => p.name === name);
+                if (idx !== -1) {
+                    arr[idx] = {
+                        ...arr[idx],
+                        name: newName.trim(),
+                        mrp: newMRP,
+                        price: newPrice,
+                        discounted: newPrice,
+                        stock: newStock,
+                        minQty: newMinQty,
+                        category: newCat,
+                        subcategory: newSubcat,
+                        desc: newDesc
+                    };
+                    setLS(key, arr);
+                }
+            });
+            renderProductsTable(document.querySelector('.category-tab.active')?.dataset.cat || 'All', document.getElementById("productSearchInput").value.trim().toLowerCase(), document.getElementById("subcategoryTabs")?.querySelector('.category-tab.active')?.dataset.subcat || 'All');
+            alert("Product updated!");
+        };
+
+        // --- Remove Product ---
+        window.removeProduct = function(name) {
+            name = decodeURIComponent(name);
+            if (!confirm("Are you sure you want to remove this product from all sources?")) return;
+            ["liveProducts", "arrivals", "today99deals"].forEach(key => {
+                let arr = getLS(key);
+                arr = arr.filter(p => p.name !== name);
+                setLS(key, arr);
+            });
+            renderProductsTable(document.querySelector('.category-tab.active')?.dataset.cat || 'All', document.getElementById("productSearchInput").value.trim().toLowerCase(), document.getElementById("subcategoryTabs")?.querySelector('.category-tab.active')?.dataset.subcat || 'All');
+            alert("Product removed!");
+        };
+
+        // --- Search functionality ---
+        document.getElementById("productSearchInput").addEventListener("input", function() {
+            renderProductsTable(
+                document.querySelector('.category-tab.active')?.dataset.cat || 'All',
+                this.value.trim().toLowerCase(),
+                document.getElementById("subcategoryTabs")?.querySelector('.category-tab.active')?.dataset.subcat || 'All'
+            );
+        });
+
+        // --- Add Product Modal ---
+        function showAddProductModal() {
+            if (document.getElementById("addProductModalBg")) return;
+            const modalBg = document.createElement("div");
+            modalBg.id = "addProductModalBg";
+            modalBg.style = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0008;z-index:9999;display:flex;align-items:center;justify-content:center;";
+            modalBg.innerHTML = `
+                <div style="background:#fff;max-width:420px;width:95vw;padding:28px 22px 18px 22px;border-radius:10px;box-shadow:0 4px 24px #0002;position:relative;">
+                    <button onclick="closeAddProductModal()" style="position:absolute;top:10px;right:10px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:1.2em;cursor:pointer;">&times;</button>
+                    <h3 style="margin-bottom:18px;color:#1d3557;"><i class="fas fa-plus"></i> Add New Product</h3>
+                    <form id="addProductForm" autocomplete="off">
+                        <input type="text" id="addProdName" placeholder="Product Name" required style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                        <input type="number" id="addProdMRP" placeholder="MRP" min="1" required style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                        <input type="number" id="addProdPrice" placeholder="Selling Price" min="1" required style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                        <input type="number" id="addProdStock" placeholder="Stock" min="0" required style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                        <input type="number" id="addProdMinQty" placeholder="Min Qty" min="1" value="1" required style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                        <select id="addProdCategory" required style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                            <option value="">Select Category</option>
+                            ${CATEGORY_DEFS.map(c => `<option value="${c.name}">${c.name}</option>`).join("")}
+                        </select>
+                        <select id="addProdSubcategory" required style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                            <option value="">Select Subcategory</option>
+                        </select>
+                        <input type="text" id="addProdImg" placeholder="Image URL" style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;">
+                        <textarea id="addProdDesc" placeholder="Description" style="width:100%;margin-bottom:10px;padding:7px;border-radius:4px;border:1px solid #ccc;"></textarea>
+                        <button type="submit" style="width:100%;padding:10px;background:#27ae60;color:#fff;border:none;border-radius:5px;font-size:1.1em;font-weight:500;cursor:pointer;">Add Product</button>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modalBg);
+
+            // Populate subcategory on category change
+            document.getElementById("addProdCategory").onchange = function() {
+                const cat = this.value;
+                const subcatSel = document.getElementById("addProdSubcategory");
+                subcatSel.innerHTML = `<option value="">Select Subcategory</option>`;
+                const found = CATEGORY_DEFS.find(c => c.name === cat);
+                if (found) {
+                    found.subcategories.filter(s => s !== "All").forEach(sub => {
+                        const opt = document.createElement("option");
+                        opt.value = sub;
+                        opt.textContent = sub;
+                        subcatSel.appendChild(opt);
+                    });
+                }
+            };
+
+            // Handle form submit
+            document.getElementById("addProductForm").onsubmit = function(e) {
+                e.preventDefault();
+                const name = document.getElementById("addProdName").value.trim();
+                const mrp = Number(document.getElementById("addProdMRP").value);
+                const price = Number(document.getElementById("addProdPrice").value);
+                const stock = Number(document.getElementById("addProdStock").value);
+                const minQty = Number(document.getElementById("addProdMinQty").value);
+                const category = document.getElementById("addProdCategory").value;
+                const subcategory = document.getElementById("addProdSubcategory").value;
+                const img = document.getElementById("addProdImg").value.trim();
+                const desc = document.getElementById("addProdDesc").value.trim();
+
+                if (!name || !category || !subcategory) {
+                    alert("Please fill all required fields.");
+                    return;
+                }
+                // Prevent duplicate product names
+                if (getAllProducts().some(p => p.name === name)) {
+                    alert("A product with this name already exists.");
+                    return;
+                }
+                // Add to arrivals (drafts) by default
+                let arrivals = getLS("arrivals");
+                arrivals.push({
+                    name, mrp, price, discounted: price, stock, minQty, category, subcategory, img, desc, createdAt: new Date().toISOString()
+                });
+                setLS("arrivals", arrivals);
+                closeAddProductModal();
+                renderProductsTable(
+                    document.querySelector('.category-tab.active')?.dataset.cat || 'All',
+                    document.getElementById("productSearchInput").value.trim().toLowerCase(),
+                    document.getElementById("subcategoryTabs")?.querySelector('.category-tab.active')?.dataset.subcat || 'All'
+                );
+                alert("Product added to Arrivals (Drafts)!");
+            };
+        }
+        function closeAddProductModal() {
+            const modal = document.getElementById("addProductModalBg");
+            if (modal) modal.remove();
+        }
+        window.showAddProductModal = showAddProductModal;
+        window.closeAddProductModal = closeAddProductModal;
+
+        // --- Add "Add Product" button to header ---
+        (function() {
+            const header = document.querySelector('.admin-products-header');
+            if (header && !document.getElementById("addProductBtn")) {
+                const btn = document.createElement("button");
+                btn.id = "addProductBtn";
+                btn.style.background = "#27ae60";
+                btn.innerHTML = `<i class="fas fa-plus"></i> Add Product`;
+                btn.onclick = showAddProductModal;
+                header.insertBefore(btn, header.firstChild.nextSibling);
+            }
+        })();
+
+        // --- Initial Render ---
+        renderProductsTable('All', '', 'All');
+    </script>
+</body>
+</html>

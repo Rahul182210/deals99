@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Special Offers | Deals99</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    .special-offers-section {
+      padding: 40px 20px;
+      background: #f7f7fa;
+      min-height: 100vh;
+    }
+    .section-title {
+      color: #e63946;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .special-offer-block {
+      margin-bottom: 32px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #0001;
+      padding: 18px 18px 10px 18px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .special-offer-title {
+      font-size: 1.15em;
+      font-weight: 600;
+      color: #e63946;
+      margin-bottom: 6px;
+    }
+    .products-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 10px;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px #0001;
+      padding: 14px;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.18s, transform 0.13s;
+      position: relative;
+    }
+    .product-card:hover {
+      box-shadow: 0 8px 28px #ff3e6c22;
+      transform: translateY(-4px) scale(1.04);
+    }
+    .product-card img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #f7f7fa;
+    }
+    .product-info {
+      text-align: center;
+    }
+    .mrp {
+      color: #888;
+      text-decoration: line-through;
+      margin-right: 6px;
+    }
+    .discounted {
+      color: #e63946;
+      font-weight: bold;
+      font-size: 1.12em;
+    }
+    .add-to-cart-btn {
+      margin-top: 8px;
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 7px 16px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.18s;
+    }
+    .add-to-cart-btn:hover {
+      background: #219150;
+    }
+    .wishlist-btn {
+      background: #fff;
+      color: #e63946;
+      border: 1px solid #e63946;
+      border-radius: 5px;
+      padding: 6px 12px;
+      margin-top: 6px;
+      font-size: 0.98em;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+    }
+    .wishlist-btn.active, .wishlist-btn:hover {
+      background: #e63946;
+      color: #fff;
+    }
+    .quick-view-btn {
+      background: #457b9d;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      margin-top: 6px;
+      font-size: 0.98em;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .quick-view-btn:hover {
+      background: #1d3557;
+    }
+    .wishlist-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      color: #e63946;
+      font-size: 1.2em;
+      background: #fff;
+      border-radius: 50%;
+      padding: 2px 6px;
+      box-shadow: 0 2px 8px #0001;
+    }
+    @media (max-width: 700px) {
+      .products-flex { gap: 12px; }
+      .product-card { width: 100%; min-width: 0; }
+      .special-offer-block { padding: 10px 4px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="special-offers-section">
+    <h1 class="section-title"><i class="fas fa-bolt"></i> Special Offers</h1>
+    <div id="specialOffersGrid"></div>
+  </section>
+  <div id="quickViewModalBg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0008;"></div>
+  <script>
+    // --- Wishlist utility ---
+    function getWishlist() {
+      return JSON.parse(localStorage.getItem("wishlist")) || [];
+    }
+    function setWishlist(arr) {
+      localStorage.setItem("wishlist", JSON.stringify(arr));
+    }
+
+    // --- Quick View Modal ---
+    function quickViewProduct(productName) {
+      // Try to find product in all sources
+      const allProducts = [
+        ...(JSON.parse(localStorage.getItem("liveProducts")) || []),
+        ...(JSON.parse(localStorage.getItem("arrivals")) || []),
+        ...(JSON.parse(localStorage.getItem("today99deals")) || [])
+      ];
+      const prod = allProducts.find(p => p.name === productName);
+      if (!prod) return;
+      document.getElementById("quickViewModalBg").innerHTML = `
+        <div class="login-modal-bg" onclick="closeQuickViewModal(event)">
+          <div class="login-modal" style="max-width:400px;" onclick="event.stopPropagation();">
+            <button class="close-btn" onclick="closeQuickViewModal(event);return false;">&times;</button>
+            <h2>${prod.name}</h2>
+            <img src="${Array.isArray(prod.img) ? prod.img[0] : (prod.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png')}" alt="${prod.name}" style="width:120px;height:120px;object-fit:contain;margin:10px auto;display:block;">
+            <div style="margin:10px 0;">
+              ${prod.mrp && prod.mrp != prod.price ? `<span style="text-decoration:line-through;color:#888;">₹${prod.mrp}</span> ` : ""}
+              <span style="color:#ff3e6c;font-weight:bold;">₹${prod.price}</span>
+            </div>
+            <div style="color:#888;font-size:1em;margin-bottom:10px;">${prod.desc || ""}</div>
+            <button class="add-to-cart-btn" onclick="addToCart('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+            <button class="wishlist-btn" onclick="toggleWishlist('${prod.name.replace(/'/g,"\\'")}')">
+              <i class="fas fa-heart"></i> Wishlist
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById("quickViewModalBg").style.display = "flex";
+    }
+    function closeQuickViewModal(e) {
+      if (e) e.preventDefault();
+      document.getElementById("quickViewModalBg").style.display = "none";
+      document.getElementById("quickViewModalBg").innerHTML = "";
+    }
+    window.quickViewProduct = quickViewProduct;
+    window.closeQuickViewModal = closeQuickViewModal;
+
+    // --- Add to Cart functionality ---
+    function addToCart(productName) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(productName);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`🛒 "${productName}" added to cart!`);
+      if (typeof updateCartIcon === "function") updateCartIcon();
+      if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+    }
+    window.addToCart = addToCart;
+
+    // --- Wishlist functionality ---
+    function toggleWishlist(productName) {
+      let wishlist = getWishlist();
+      if (wishlist.includes(productName)) {
+        wishlist = wishlist.filter(n => n !== productName);
+      } else {
+        wishlist.push(productName);
+      }
+      setWishlist(wishlist);
+      renderSpecialOffersPage();
+    }
+    window.toggleWishlist = toggleWishlist;
+
+    // --- Render Special Offers page ---
+    function renderSpecialOffersPage() {
+      const offers = JSON.parse(localStorage.getItem("specialOffers")) || [];
+      const wishlist = getWishlist();
+      const grid = document.getElementById("specialOffersGrid");
+      if (!offers.length) {
+        grid.innerHTML = `<div style="color:#888;text-align:center;">No special offers available.</div>`;
+        return;
+      }
+      grid.innerHTML = offers.map(offer => `
+        <div class="special-offer-block">
+          <div class="special-offer-title">
+            <i class="fas fa-bolt"></i> ${offer.title}
+          </div>
+          <div style="color:#888;margin-bottom:8px;">${offer.desc}</div>
+          <div style="font-size:0.97em;color:#219150;margin-bottom:10px;">
+            Valid till: ${offer.validTill ? new Date(offer.validTill).toLocaleString() : "N/A"}
+          </div>
+          <div class="products-flex">
+            ${
+              (offer.products && offer.products.length)
+                ? offer.products.map(item => `
+                  <div class="product-card">
+                    ${wishlist.includes(item.name) ? `<div class="wishlist-badge" title="In Wishlist"><i class="fas fa-heart"></i></div>` : ""}
+                    <img src="${item.img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" alt="${item.name}" />
+                    <div class="product-info">
+                      <strong>${item.name}</strong>
+                      <div>
+                        ${item.mrp && item.mrp != item.price ? `<span class="mrp">₹${item.mrp}</span>` : ""}
+                        <span class="discounted">₹${item.price}</span>
+                      </div>
+                      <div style="font-size:0.95em;color:#888;">${item.desc || ""}</div>
+                      <button class="add-to-cart-btn" onclick="addToCart('${item.name.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                      </button>
+                      <button class="wishlist-btn${wishlist.includes(item.name) ? ' active' : ''}" onclick="toggleWishlist('${item.name.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-heart"></i> Wishlist
+                      </button>
+                      <button class="quick-view-btn" onclick="quickViewProduct('${item.name.replace(/'/g,"\\'")}')">
+                        <i class="fas fa-eye"></i> Quick View
+                      </button>
+                    </div>
+                  </div>
+                `).join("")
+                : `<div style="color:#aaa;font-size:1.05em;">No products in this offer.</div>`
+            }
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener("DOMContentLoaded", renderSpecialOffersPage);
+  </script>
+</body>
+</html>

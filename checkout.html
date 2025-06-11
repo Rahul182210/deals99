@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkout | Deals99</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .order-summary { margin: 20px 0; padding: 10px; background: #f8f8f8; border-radius: 6px; }
+    .order-summary h3 { margin-top: 0; }
+    .order-summary ul { padding-left: 20px; }
+    .order-summary li { margin-bottom: 5px; }
+    .success-message { color: #27ae60; font-weight: bold; }
+    .payment-section { margin: 20px 0; padding: 12px; background: #f3f7fa; border-radius: 6px; }
+    .payment-section label { display: block; margin-bottom: 8px; font-weight: 500; }
+    .payment-methods { display: flex; gap: 18px; margin-bottom: 10px; }
+    .payment-methods label { font-weight: normal; }
+    .address-fields input, .address-fields textarea { width: 100%; margin-bottom: 10px; padding: 7px; border-radius: 4px; border: 1px solid #ccc; }
+    .address-fields { margin-bottom: 10px; }
+    .checkout-btn {
+      width: 100%; padding: 12px; background: #1d3557; color: #fff; border: none; border-radius: 6px; font-size: 1.1em; font-weight: 500; cursor: pointer; transition: background 0.18s;
+    }
+    .checkout-btn:hover { background: #ff3e6c; }
+    .checkout-error { color: #e63946; margin-bottom: 10px; text-align: center; }
+    .checkout-success { color: #27ae60; margin-bottom: 10px; text-align: center; }
+    .order-summary .cart-product-img {
+      width: 32px; height: 32px; object-fit: cover; border-radius: 6px; margin-right: 8px; border: 1px solid #eee; background: #fafbfc;
+      vertical-align: middle;
+    }
+    @media (max-width: 600px) {
+      .order-summary, .payment-section { padding: 6px; }
+      .checkout-btn { font-size: 1em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Checkout</h2>
+    <div class="order-summary" id="orderSummary"></div>
+    <form id="checkoutForm" autocomplete="on">
+      <div class="address-fields">
+        <input type="text" id="fullName" placeholder="Full Name" required autocomplete="name" />
+        <input type="email" id="email" placeholder="Email" required autocomplete="email" />
+        <input type="tel" id="phone" placeholder="Phone Number" required autocomplete="tel" pattern="[0-9]{10,}" />
+        <input type="text" id="addressLine1" placeholder="Address Line 1" required autocomplete="address-line1" />
+        <input type="text" id="addressLine2" placeholder="Address Line 2 (optional)" autocomplete="address-line2" />
+        <input type="text" id="city" placeholder="City" required autocomplete="address-level2" />
+        <input type="text" id="state" placeholder="State" required autocomplete="address-level1" />
+        <input type="text" id="pincode" placeholder="Pincode" required autocomplete="postal-code" pattern="[0-9]{5,7}" />
+        <textarea id="landmark" placeholder="Landmark (optional)" autocomplete="off"></textarea>
+      </div>
+      <div class="payment-section">
+        <label>Payment Method</label>
+        <div class="payment-methods">
+          <label><input type="radio" name="payment" value="cod" checked /> Cash on Delivery</label>
+          <label><input type="radio" name="payment" value="upi" /> UPI</label>
+          <label><input type="radio" name="payment" value="card" /> Credit/Debit Card</label>
+        </div>
+        <div id="paymentDetails"></div>
+      </div>
+      <div id="checkoutError" class="checkout-error" style="display:none;"></div>
+      <button type="submit" class="checkout-btn">Place Order</button>
+    </form>
+    <div id="confirmation"></div>
+    <div style="margin-top:20px;">
+      <a href="cart.html" style="text-decoration:underline;">&#8592; Back to Cart</a>
+    </div>
+  </div>
+  <script>
+    // --- Utility: Get all products from all sources ---
+    function getAllProducts() {
+      const live = JSON.parse(localStorage.getItem("liveProducts")) || [];
+      const arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+      const today99 = JSON.parse(localStorage.getItem("today99deals")) || [];
+      const all = [...live, ...arrivals, ...today99];
+      const seen = new Set();
+      return all.filter(p => {
+        if (seen.has(p.name)) return false;
+        seen.add(p.name);
+        return true;
+      });
+    }
+
+    // --- Show order summary from cart ---
+    function renderOrderSummary() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const allProducts = getAllProducts();
+      const summaryDiv = document.getElementById("orderSummary");
+      if (!cart.length) {
+        summaryDiv.innerHTML = "<em>Your cart is empty.</em>";
+        document.getElementById("checkoutForm").style.display = "none";
+        return;
+      }
+      let total = 0;
+      let itemsHtml = "";
+      // Count quantities
+      const cartMap = {};
+      cart.forEach(itemName => {
+        cartMap[itemName] = (cartMap[itemName] || 0) + 1;
+      });
+      Object.entries(cartMap).forEach(([itemName, qty]) => {
+        const found = allProducts.find(a => a.name === itemName);
+        let price = found ? Number(found.price || found.discounted || 0) : 0;
+        let img = found && found.img ? (Array.isArray(found.img) ? found.img[0] : found.img) : 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png';
+        itemsHtml += `<li><img src="${img}" class="cart-product-img" alt="${itemName}"/>${itemName} - ₹${price} x ${qty}</li>`;
+        total += price * qty;
+      });
+      summaryDiv.innerHTML = `
+        <h3>Order Summary</h3>
+        <ul>${itemsHtml}</ul>
+        <strong>Total: ₹${total}</strong>
+      `;
+    }
+
+    // --- Payment portal UI ---
+    function renderPaymentDetails(method) {
+      const pd = document.getElementById("paymentDetails");
+      pd.innerHTML = "";
+      if (method === "upi") {
+        pd.innerHTML = `
+          <input type="text" id="upiId" placeholder="Enter UPI ID" required style="margin-bottom:8px;width:100%;" />
+          <div style="font-size:0.97em;color:#888;">You will receive a payment request on your UPI app.</div>
+        `;
+      } else if (method === "card") {
+        pd.innerHTML = `
+          <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" required style="margin-bottom:8px;width:100%;" pattern="[0-9 ]{16,19}" />
+          <input type="text" id="cardName" placeholder="Name on Card" required style="margin-bottom:8px;width:100%;" />
+          <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" required style="margin-bottom:8px;width:100%;" pattern="(0[1-9]|1[0-2])\/[0-9]{2}" />
+          <input type="text" id="cardCVV" placeholder="CVV" maxlength="4" required style="margin-bottom:8px;width:100%;" pattern="[0-9]{3,4}" />
+        `;
+      }
+    }
+
+    // --- Save order to localStorage ---
+    function saveOrderFromCheckout(name, email, address, cart, allProducts, phone, paymentMethod, notes = "") {
+      // Count quantities
+      const cartMap = {};
+      cart.forEach(itemName => {
+        cartMap[itemName] = (cartMap[itemName] || 0) + 1;
+      });
+      const items = Object.entries(cartMap).map(([itemName, qty]) => {
+        const found = allProducts.find(a => a.name === itemName);
+        return {
+          name: itemName,
+          price: found ? Number(found.price || found.discounted || 0) : 0,
+          qty
+        };
+      });
+      const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+      const order = {
+        name, email, phone, address, items, total,
+        status: "Pending",
+        payment: paymentMethod,
+        notes,
+        date: new Date().toISOString()
+      };
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      orders.push(order);
+      localStorage.setItem("orders", JSON.stringify(orders));
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      renderOrderSummary();
+
+      // Autofocus first field
+      document.getElementById("fullName").focus();
+
+      // Payment method change
+      document.querySelectorAll('input[name="payment"]').forEach(radio => {
+        radio.addEventListener("change", function() {
+          renderPaymentDetails(this.value);
+        });
+      });
+
+      // Default payment details
+      renderPaymentDetails(document.querySelector('input[name="payment"]:checked').value);
+
+      // Handle checkout form submit
+      document.getElementById("checkoutForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const errorDiv = document.getElementById("checkoutError");
+        errorDiv.style.display = "none";
+        errorDiv.textContent = "";
+
+        // Simple validation
+        const name = document.getElementById("fullName").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const addressLine1 = document.getElementById("addressLine1").value.trim();
+        const addressLine2 = document.getElementById("addressLine2").value.trim();
+        const city = document.getElementById("city").value.trim();
+        const state = document.getElementById("state").value.trim();
+        const pincode = document.getElementById("pincode").value.trim();
+        const landmark = document.getElementById("landmark").value.trim();
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+        // Address validation
+        if (!name || !email || !phone || !addressLine1 || !city || !state || !pincode) {
+          errorDiv.textContent = "Please fill all required address fields.";
+          errorDiv.style.display = "block";
+          return;
+        }
+        // Payment validation
+        if (paymentMethod === "upi") {
+          const upiId = document.getElementById("upiId").value.trim();
+          if (!upiId || !upiId.includes("@")) {
+            errorDiv.textContent = "Please enter a valid UPI ID.";
+            errorDiv.style.display = "block";
+            return;
+          }
+        } else if (paymentMethod === "card") {
+          const cardNumber = document.getElementById("cardNumber").value.trim();
+          const cardName = document.getElementById("cardName").value.trim();
+          const cardExpiry = document.getElementById("cardExpiry").value.trim();
+          const cardCVV = document.getElementById("cardCVV").value.trim();
+          if (!cardNumber.match(/^[0-9 ]{16,19}$/) || !cardName || !cardExpiry.match(/^(0[1-9]|1[0-2])\/[0-9]{2}$/) || !cardCVV.match(/^[0-9]{3,4}$/)) {
+            errorDiv.textContent = "Please enter valid card details.";
+            errorDiv.style.display = "block";
+            return;
+          }
+        }
+
+        // Compose full address
+        const fullAddress = `${addressLine1}${addressLine2 ? ', ' + addressLine2 : ''}, ${city}, ${state} - ${pincode}${landmark ? ', Landmark: ' + landmark : ''}, Phone: ${phone}`;
+
+        // Save order
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const allProducts = getAllProducts();
+        saveOrderFromCheckout(name, email, fullAddress, cart, allProducts, phone, paymentMethod);
+
+        // Show confirmation
+        document.getElementById("confirmation").innerHTML = `
+          <div class="success-message checkout-success">
+            <h3>✅ Order placed successfully!</h3>
+            <p>Thank you, <b>${name}</b>!<br>
+            A confirmation has been sent to <b>${email}</b>.<br>
+            Your order will be delivered to:<br>
+            <pre style="display:inline;">${fullAddress}</pre>
+            <br>Payment Method: <b>${paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod === "upi" ? "UPI" : "Card"}</b>
+            </p>
+          </div>
+        `;
+        // Clear cart and form
+        localStorage.removeItem("cart");
+        document.getElementById("checkoutForm").reset();
+        document.getElementById("checkoutForm").style.display = "none";
+        if (typeof updateCartIcon === "function") updateCartIcon();
+        if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Orders | Deals99</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { background: #f8f9fa; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
+    .orders-container { max-width: 900px; margin: 40px auto 0 auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px #0001; }
+    .orders-title { font-size: 2em; color: #1d3557; margin-bottom: 18px; }
+    .orders-list { display: flex; flex-direction: column; gap: 18px; }
+    .order-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 16px;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      position: relative;
+      transition: box-shadow 0.18s, transform 0.13s;
+    }
+    .order-card:hover {
+      box-shadow: 0 8px 28px #ff3e6c22;
+      transform: translateY(-2px) scale(1.01);
+    }
+    .order-card img { width: 80px; height: 80px; object-fit: contain; border-radius: 8px; background: #f8f8f8; }
+    .order-info { flex: 1; }
+    .order-status {
+      font-size: 0.98em;
+      font-weight: 500;
+      color: #fff;
+      background: #457b9d;
+      border-radius: 4px;
+      padding: 2px 10px;
+      display: inline-block;
+      margin-bottom: 6px;
+      text-transform: capitalize;
+    }
+    .order-status.delivered { background: #43aa8b; }
+    .order-status.cancelled { background: #e63946; }
+    .order-status.shipped { background: #f1c40f; color: #222; }
+    .order-status.pending { background: #e67e22; }
+    .order-date { color: #888; font-size: 0.97em; margin-bottom: 4px; }
+    .order-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .order-actions button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      background: #e63946;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.97em;
+      transition: background 0.2s;
+    }
+    .order-actions button:disabled { background: #ccc; cursor: not-allowed; }
+    .order-actions .reorder-btn {
+      background: #457b9d;
+    }
+    .order-actions .reorder-btn:hover {
+      background: #1d3557;
+    }
+    .orders-empty { color: #888; text-align: center; font-size: 1.2em; margin: 40px 0; }
+    .order-items-list {
+      margin: 8px 0 0 0;
+      padding-left: 18px;
+      color: #444;
+      font-size: 0.98em;
+    }
+    .order-total {
+      font-weight: bold;
+      color: #1d3557;
+      margin-top: 6px;
+      font-size: 1.07em;
+    }
+    @media (max-width: 700px) {
+      .orders-container { padding: 10px; }
+      .order-card { flex-direction: column; align-items: center; }
+      .order-card img { margin-bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orders-container">
+    <div class="orders-title"><i class="fas fa-box"></i> My Orders</div>
+    <div id="ordersList" class="orders-list"></div>
+    <div id="ordersEmpty" class="orders-empty" style="display:none;">You have not placed any orders yet.</div>
+    <div style="margin-top:30px;">
+      <a href="index.html" style="color:#1d3557;text-decoration:underline;font-size:1.1em;"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
+    </div>
+  </div>
+  <script>
+    // --- Utility: Get all products from all sources ---
+    function getAllProducts() {
+      const live = JSON.parse(localStorage.getItem("liveProducts")) || [];
+      const arrivals = JSON.parse(localStorage.getItem("arrivals")) || [];
+      const today99 = JSON.parse(localStorage.getItem("today99deals")) || [];
+      const all = [...live, ...arrivals, ...today99];
+      const seen = new Set();
+      return all.filter(p => {
+        if (seen.has(p.name)) return false;
+        seen.add(p.name);
+        return true;
+      });
+    }
+
+    // --- Get orders for current user ---
+    function getOrders() {
+      const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      // Show only orders for current user (by email)
+      if (user && user.email) {
+        orders = orders.filter(o => o.email === user.email);
+      }
+      return orders;
+    }
+
+    // --- Get readable order status ---
+    function getOrderStatus(order) {
+      if (order.status) return order.status;
+      // Demo fallback: alternate delivered/cancelled/pending
+      const idx = order.orderId ? order.orderId.charCodeAt(0) % 3 : 0;
+      return ["Delivered", "Pending", "Cancelled"][idx];
+    }
+
+    // --- Render all orders for user ---
+    function renderOrders() {
+      const orders = getOrders();
+      const allProducts = getAllProducts();
+      const listDiv = document.getElementById("ordersList");
+      const emptyDiv = document.getElementById("ordersEmpty");
+      listDiv.innerHTML = "";
+      if (!orders.length) {
+        emptyDiv.style.display = "block";
+        return;
+      }
+      emptyDiv.style.display = "none";
+      orders.slice().reverse().forEach(order => {
+        // Try to get product details for image/desc
+        let img = order.img;
+        let desc = "";
+        let itemsHtml = "";
+        let total = order.total || 0;
+        // Support both single-product and multi-product orders
+        if (order.items && Array.isArray(order.items) && order.items.length) {
+          // Multi-product order
+          img = order.items[0].img || (allProducts.find(p => p.name === order.items[0].name)?.img);
+          itemsHtml = `<ul class="order-items-list">` +
+            order.items.map(i => {
+              const prod = allProducts.find(p => p.name === i.name) || {};
+              return `<li>
+                ${i.name} <span style="color:#888;">x${i.qty}</span>
+                <span style="color:#ff3e6c;font-weight:500;">₹${i.price}</span>
+              </li>`;
+            }).join("") +
+            `</ul>`;
+          desc = allProducts.find(p => p.name === order.items[0].name)?.desc || "";
+        } else {
+          // Single-product order (legacy)
+          const product = allProducts.find(p => p.name === order.name) || {};
+          img = order.img || product.img;
+          desc = product.desc || "";
+          itemsHtml = "";
+          total = order.price || product.price || order.total || 0;
+        }
+        const status = getOrderStatus(order);
+        listDiv.innerHTML += `
+          <div class="order-card">
+            <img src="${img || 'https://cdn-icons-png.flaticon.com/512/2905/2905673.png'}" alt="${order.name || (order.items && order.items[0]?.name) || 'Product'}" />
+            <div class="order-info">
+              <div class="order-status ${status.toLowerCase()}">${status}</div>
+              <div class="order-date"><i class="fas fa-calendar"></i> ${order.date ? new Date(order.date).toLocaleString() : "Unknown date"}</div>
+              <strong>${order.name || (order.items && order.items[0]?.name) || "Order"}</strong>
+              <div>
+                ${order.mrp && order.mrp != order.price ? `<span style="text-decoration:line-through;color:#888;">₹${order.mrp}</span> ` : ""}
+                <span style="color:#ff3e6c;font-weight:bold;">₹${order.price || total || "—"}</span>
+              </div>
+              <div style="font-size:0.95em;color:#888;">${desc}</div>
+              ${itemsHtml}
+              <div class="order-total">Total: ₹${total}</div>
+              <div class="order-actions">
+                <button onclick="cancelOrder('${order.orderId || order.date}')" ${status !== "Pending" ? "disabled" : ""}>Cancel Order</button>
+                <button class="reorder-btn" onclick="reorder('${encodeURIComponent(JSON.stringify(order))}')"><i class="fas fa-redo"></i> Reorder</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // --- Cancel order (only if pending) ---
+    function cancelOrder(orderId) {
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      const idx = orders.findIndex(o => (o.orderId || o.date) === orderId);
+      if (idx !== -1 && getOrderStatus(orders[idx]) === "Pending") {
+        if (confirm("Are you sure you want to cancel this order?")) {
+          orders[idx].status = "Cancelled";
+          localStorage.setItem("orders", JSON.stringify(orders));
+          renderOrders();
+        }
+      }
+    }
+    window.cancelOrder = cancelOrder;
+
+    // --- Reorder: add all items back to cart ---
+    function reorder(orderStr) {
+      const order = JSON.parse(decodeURIComponent(orderStr));
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach(i => {
+          for (let j = 0; j < (i.qty || 1); j++) cart.push(i.name);
+        });
+      } else if (order.name) {
+        cart.push(order.name);
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Products added to cart!");
+      if (typeof updateCartIcon === "function") updateCartIcon();
+      if (typeof showCartCountInTitle === "function") showCartCountInTitle();
+    }
+    window.reorder = reorder;
+
+    // Initial render
+    renderOrders();
+  </script>
+</body>
+</html>
